@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { FileText, Shield, ArrowLeft, Layers, Server, CheckCircle2, HelpCircle } from 'lucide-react';
+import { FileText, Shield, ArrowLeft, Layers, Server } from 'lucide-react';
 
 interface ReadmeModalProps {
   onBack: () => void;
@@ -24,7 +24,7 @@ export const ReadmeModal: React.FC<ReadmeModalProps> = ({ onBack }) => {
           <span>Вернуться на главную</span>
         </button>
         <span className="text-xs font-bold px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full">
-          Архитектура & TBD (INVITRO UX v0.2)
+          Архитектура & TBD (INVITRO UX v0.3)
         </span>
       </div>
 
@@ -32,7 +32,7 @@ export const ReadmeModal: React.FC<ReadmeModalProps> = ({ onBack }) => {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
         <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
           <FileText className="w-6 h-6 text-blue-600" />
-          <span>Документация прототипа ПРИИЗ v0.2</span>
+          <span>Документация прототипа ПРИИЗ v0.3</span>
         </h1>
         <p className="text-xs text-slate-600 leading-relaxed">
           ПРИИЗ — это автономный пользовательский слой для правильной регистрации, сопровождения и контроля инцидентов интеграций, спроектированный с учетом принципа максимального повторного использования (reuse/integrate) существующего IT-контура INVITRO.
