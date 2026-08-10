@@ -1,43 +1,37 @@
 /**
  * Service Desk Adapter & Integration Contracts
- * 
- * TODO: Confirm existing system of record, current capabilities and bidirectional synchronization with the real internal Service Desk. Reuse/integrate before proposing any replacement or new backend.
+ *
+ * TODO: Confirm the real system of record, existing capabilities and bidirectional
+ * synchronization with the internal Service Desk before implementing production adapters.
+ * Reuse/integrate existing capabilities before proposing a replacement backend.
  */
 
-import { Incident, DiagnosticResult } from '../types';
+import { Incident } from '../types';
 
 export interface ServiceDeskAdapter {
-  /**
-   * Synchronize PRIIZ incident with existing internal Service Desk (1С / Service Desk)
-   */
+  /** Synchronize a PRIIZ incident with the existing internal incident-management contour. */
   syncWithServiceDesk(incident: Incident): Promise<{
     internalTicketId: string;
     syncedAt: string;
     status: 'SYNCED' | 'PENDING' | 'ERROR';
   }>;
 
-  /**
-   * Query deep technical diagnostics from existing Integration Console
-   */
+  /** Return a safe, high-level diagnostic summary from the engineering contour. */
   fetchConsoleDiagnostics(inz: string): Promise<{
     inz: string;
     traceId: string;
-    integrationPlatformStatus: string;
-    rawLogsUrl: string;
-    lastHttpCode: number;
-    lastErrorMessage: string;
+    processingStatus: string;
+    deliveryStatus: string;
+    diagnosticMessage: string;
   }>;
 }
 
-/**
- * Mock implementation of ServiceDeskAdapter for UX Prototype v0.2
- */
+/** Mock implementation for the public UX prototype. No real INVITRO APIs are called. */
 export class MockServiceDeskAdapter implements ServiceDeskAdapter {
-  async syncWithServiceDesk(incident: Incident) {
-    // Simulate adapter latency
+  async syncWithServiceDesk(_incident: Incident) {
     await new Promise((resolve) => setTimeout(resolve, 300));
     return {
-      internalTicketId: `SD-INV-${Math.floor(100000 + Math.random() * 900000)}`,
+      internalTicketId: `DEMO-SD-${Math.floor(100000 + Math.random() * 900000)}`,
       syncedAt: new Date().toISOString(),
       status: 'SYNCED' as const,
     };
@@ -47,11 +41,10 @@ export class MockServiceDeskAdapter implements ServiceDeskAdapter {
     await new Promise((resolve) => setTimeout(resolve, 400));
     return {
       inz,
-      traceId: `tr_${Math.random().toString(36).substring(2, 12)}`,
-      integrationPlatformStatus: 'DEGRADE_PARTIAL',
-      rawLogsUrl: `https://console.internal.invitro.local/trace/inz/${inz}`,
-      lastHttpCode: 502,
-      lastErrorMessage: 'HTTP 502 Bad Gateway: Partner LPU endpoint socket connection reset by peer',
+      traceId: `demo_${Math.random().toString(36).substring(2, 12)}`,
+      processingStatus: 'Обработка выполнена',
+      deliveryStatus: 'Требует проверки',
+      diagnosticMessage: 'Демонстрационный результат. Реальная диагностика будет подключена через подтвержденный внутренний адаптер.',
     };
   }
 }
