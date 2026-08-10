@@ -13,8 +13,6 @@ interface ReadmeModalProps {
 export const ReadmeModal: React.FC<ReadmeModalProps> = ({ onBack }) => {
   return (
     <div className="max-w-5xl mx-auto space-y-6 py-4 pb-16">
-      
-      {/* Top Bar */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
@@ -24,22 +22,20 @@ export const ReadmeModal: React.FC<ReadmeModalProps> = ({ onBack }) => {
           <span>Вернуться на главную</span>
         </button>
         <span className="text-xs font-bold px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full">
-          Архитектура & TBD (INVITRO UX v0.3)
+          Архитектура & TBD (v0.3 DEMO)
         </span>
       </div>
 
-      {/* Main Title Card */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
         <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
           <FileText className="w-6 h-6 text-blue-600" />
-          <span>Документация прототипа ПРИИЗ v0.3</span>
+          <span>Документация прототипа ПРИИЗ v0.3 DEMO</span>
         </h1>
         <p className="text-xs text-slate-600 leading-relaxed">
           ПРИИЗ — это автономный пользовательский слой для правильной регистрации, сопровождения и контроля инцидентов интеграций, спроектированный с учетом принципа максимального повторного использования (reuse/integrate) существующего IT-контура INVITRO.
         </p>
       </div>
 
-      {/* Section 1: Current-state assumptions */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
           <Layers className="w-5 h-5 text-blue-600" />
@@ -75,39 +71,31 @@ export const ReadmeModal: React.FC<ReadmeModalProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Section 2: Architecture & Adapter Contracts */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
           <Server className="w-5 h-5 text-blue-600" />
           <span>2. Архитектура и точки подключения Адаптеров</span>
         </h2>
-
         <p className="text-xs text-slate-600">
           Приложение структурировано с четким разделением слоев UI, сервисов и репозиториев для быстрой подмены mock-слоя на реальные API/адаптеры после подтверждения архитектуры INVITRO:
         </p>
-
         <div className="p-4 rounded-xl bg-slate-900 text-slate-200 font-mono text-xs space-y-2">
           <p className="text-blue-400 font-bold">// Внутренние контракты для будущего подключения:</p>
           <p>• src/services/serviceDesk.ts (Interface ServiceDeskAdapter)</p>
           <p>• src/services/diagnostics.ts (Automated Pre-check API)</p>
           <p>• src/repositories/incidentRepository.ts (Domain Storage Adapter)</p>
         </div>
-
         <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-slate-800 space-y-1">
           <span className="font-bold text-blue-900 block">Разделение ПРИИЗ и Integration Console:</span>
-          <p className="text-slate-700 leading-relaxed">
-            ПРИИЗ не выполняет технические управляющие операции. Они остаются во внутреннем инженерном контуре.
-          </p>
+          <p className="text-slate-700 leading-relaxed">ПРИИЗ не выполняет технические управляющие операции. Они остаются во внутреннем инженерном контуре.</p>
         </div>
       </div>
 
-      {/* Section 3: Role Matrix */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
           <Shield className="w-5 h-5 text-blue-600" />
           <span>3. Ролевая матрица (Demo Role Matrix)</span>
         </h2>
-
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
@@ -122,56 +110,15 @@ export const ReadmeModal: React.FC<ReadmeModalProps> = ({ onBack }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-800">
-              <tr>
-                <td className="py-2.5 px-3 font-bold">ДКП</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold">Manager</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 font-semibold">Обзор клиента</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold">Project</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 font-semibold">Обзор проекта</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold">Product</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">Full Read-only KPI</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold">Support</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-slate-300">✕</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓ (Кнопка в карточке)</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td>
-                <td className="py-2.5 px-3 text-emerald-600 font-bold">✓ (С фиксацией причины и решения)</td>
-              </tr>
+              <tr><td className="py-2.5 px-3 font-bold">ДКП</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-slate-300">✕</td></tr>
+              <tr><td className="py-2.5 px-3 font-bold">Manager</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 font-semibold">Обзор клиента</td><td className="py-2.5 px-3 text-slate-300">✕</td></tr>
+              <tr><td className="py-2.5 px-3 font-bold">Project</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 font-semibold">Обзор проекта</td><td className="py-2.5 px-3 text-slate-300">✕</td></tr>
+              <tr><td className="py-2.5 px-3 font-bold">Product</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-emerald-600 font-bold">Full Read-only KPI</td><td className="py-2.5 px-3 text-slate-300">✕</td></tr>
+              <tr><td className="py-2.5 px-3 font-bold">Support</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-slate-300">✕</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓ (Кнопка в карточке)</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓</td><td className="py-2.5 px-3 text-emerald-600 font-bold">✓ (С фиксацией причины и решения)</td></tr>
             </tbody>
           </table>
         </div>
       </div>
-
     </div>
   );
 };
