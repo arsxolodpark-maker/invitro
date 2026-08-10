@@ -1,11 +1,106 @@
-<div align="center">
+# ПРИИЗ — Пользовательский слой управления инцидентами интеграций (INVITRO UX Prototype v0.2)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+## 1. Purpose (Назначение)
 
-  <h1>Built with AI Studio</h2>
+ПРИИЗ (Проект Регистрации Инцидентов Интеграционных Заданий) — это автономный пользовательский UX-прототип для правильной регистрации, сопровождения и сквозного контроля интеграционных инцидентов между МИС/ЛПУ клиентов и ЛИС ИНВИТРО.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+Главная цель: предотвратить распад истории инцидента по каналам (почта, чаты, личные сообщения), обязать пользователя собрать достаточный контекст с первого раза, запустить автоматический pre-check ИНЗ и зафиксировать продуктовые метрики (MTTR, полнота обращений, повторимость).
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+---
 
-</div>
+## 2. Current-State Assumptions (Текущий контекст AS-IS)
+
+В соответствии с вводными владельца продукта, ПРИИЗ не является разработкой корпоративного контура с нуля:
+
+* **Существующая инфраструктура (AS-IS):**
+  * Существующая интеграционная платформа.
+  * Домен «Сервис».
+  * Service Desk / 1С (точная схема синхронизации TBD).
+  * Частично существующий мониторинг и тестовый стенд.
+* **Существует частично / требует подтверждения (TBD):**
+  * Состав разрозненных инструментов диагностики и мониторинга.
+  * Точные правила форматирования обезличенных скриншотов по требованиям ИБ.
+* **Целевые возможности / gap to be confirmed:**
+  * Единая точка входа для ДКП, менеджеров и клиентов.
+  * Динамические формы сбора контекста по типам инцидентов (INC-02).
+  * Модуль автоматической экспресс-проверки ИНЗ (pre-check) до отправки обращения.
+  * Продуктовая аналитика качества наполнения обращений и эшелонирования.
+
+Архитектурный принцип: **Reuse & Integrate First**, и только при подтвержденном gap — new build.
+
+---
+
+## 3. Architecture & Project Structure
+
+```
+src/
+├── types.ts                     # Core TypeScript data models & interfaces
+├── services/
+│   ├── serviceDesk.ts           # ServiceDeskAdapter & Integration Console contracts
+│   ├── diagnostics.ts           # Automated Pre-Check service simulation
+│   └── incidents.ts             # Business logic service (create, comment, close, metrics)
+├── repositories/
+│   └── incidentRepository.ts    # In-memory & localStorage store seeded with demo tickets
+├── components/
+│   ├── Header.tsx               # Role switcher & navigation
+│   ├── MainDashboard.tsx        # Screen 1: Dashboard & ticket list with filters
+│   ├── IncidentTypeSelect.tsx   # Screen 2: Type selection (INC-01..05)
+│   ├── IncidentForm.tsx         # Screen 3: Dynamic INC-02 form with precheck
+│   ├── IncidentDetailCard.tsx   # Screen 4: Ticket view with diagnostics & comments
+│   ├── IntegrationConsoleModal.tsx # Demo Integration Console view (Support boundary)
+│   ├── AnalyticsView.tsx        # Screen 5: Product & Manager KPI analytics
+│   └── ReadmeModal.tsx          # Architecture & TBD view
+├── App.tsx                      # Main application component & routing state
+└── main.tsx                     # Entry point
+```
+
+---
+
+## 4. Demo Roles (Ролевая матрица)
+
+Переключатель роли находится в верхней панели приложения:
+
+1. **ДКП**: создание обращения, комментарии, подтверждение получения результатов.
+2. **Manager**: права ДКП + обзор обращений клиентов.
+3. **Project**: права ДКП + обзор обращений проекта интеграций.
+4. **Product**: read-only продуктовая аналитика (KPI, MTTR, качество контекста).
+5. **Support**: полный контекст, экспресс-диагностика, ссылка «Открыть в консоли (демо)», закрытие с фиксацией Root Cause.
+
+---
+
+## 5. Main Scenario Flow (INC-02 «Не получен результат»)
+
+1. **Главная (Screen 1)** -> Нажать «Создать обращение».
+2. **Тип обращения (Screen 2)** -> Выбрать `INC-02 «Не получен результат»`.
+3. **Динамическая форма (Screen 3)** -> Заполнить обязательные поля (*), при отметке чекбокса «Уже обращались к вендору» появляется поле «Ответ вендора *».
+4. **Pre-check** -> Нажать «Предварительно проверить» (пауза 700-1200мс). Показываются результаты 4 этапов диагностики.
+5. **Создать инцидент** -> Генерируется номер `PRIIZ-XXXXXX`.
+6. **Карточка инцидента (Screen 4)** -> Просмотр 4 этапов диагностики, добавление комментариев.
+7. **Support** -> Кнопка «Открыть в консоли (демо)» демонстрирует переход в инженерный контур `Integration Console`.
+8. **ДКП** -> Нажимает «Подтвердить получение результата».
+9. **Support** -> Нажимает «Закрыть инцидент» (указывает Root Cause и резолюцию).
+
+---
+
+## 6. How to Run (Запуск прототипа)
+
+```bash
+# Установка зависимостей
+npm install
+
+# Запуск dev-сервера
+npm run dev
+
+# Сборка проекта
+npm run build
+```
+
+---
+
+## 7. Mock Data Warning & Production TBD
+
+* **Mock Data Warning:** Все данные в прототипе (клиенты, ЛПУ, ИНЗ, вендоры, имена, метрики) являются вымышленными демо-данными. Реальные медицинские и персональные данные не используются.
+* **Production TBD List:**
+  1. Подтверждение существующего REST/SOAP API реального Service Desk / 1С для реализации `ServiceDeskAdapter`.
+  2. Утверждение регламента ИБ по загрузке и фильтрации скриншотов из МИС.
+  3. Согласование правила двухэтапного закрытия тикетов (Подтверждение ДКП -> Закрытие Support).
