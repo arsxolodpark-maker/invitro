@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-slate-900 tracking-tight text-lg">ПРИИЗ</span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                  v0.2 INVITRO
+                  v0.3 DEMO
                 </span>
                 <span className="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-xs bg-amber-100 text-amber-800 border border-amber-200">
                   UX prototype
