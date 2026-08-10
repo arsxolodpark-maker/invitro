@@ -1,6 +1,6 @@
 {
-  "name": "ПРИИЗ - Управление инцидентами",
-  "description": "Автономный UX-прототип пользовательского слоя управления инцидентами интеграций INVITRO",
+  "name": "ПРИИЗ INVITRO v0.3 DEMO",
+  "description": "Демонстрационный UX-прототип пользовательского слоя управления инцидентами интеграций INVITRO",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }
