@@ -1,6 +1,6 @@
 /**
  * Main Application Component
- * PRIIZ INVITRO UX Prototype v0.3
+ * PRIIZ INVITRO UX Prototype v0.3 DEMO
  */
 
 import React, { useState, useEffect } from 'react';
@@ -186,7 +186,7 @@ export default function App() {
       <footer className="bg-white border-t border-slate-200 py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-slate-800">ПРИИЗ INVITRO UX Prototype v0.3</span>
+            <span className="font-bold text-slate-800">ПРИИЗ INVITRO UX Prototype v0.3 DEMO</span>
             <span>•</span>
             <span>Автономный пользовательский слой</span>
           </div>
