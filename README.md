@@ -1,4 +1,4 @@
-# ПРИИЗ INVITRO - UX Prototype
+# ПРИИЗ INVITRO - UX Prototype v0.3 DEMO
 
 Демонстрационный пользовательский прототип для регистрации и сопровождения инцидентов интеграций.
 
@@ -65,11 +65,7 @@ npm run preview
 
 ## GitHub Pages
 
-Проект подготовлен к публикации из репозитория:
-
-`arsxolodpark-maker/invitro`
-
-Ожидаемый адрес после включения GitHub Pages:
+Публичная demo-версия:
 
 `https://arsxolodpark-maker.github.io/invitro/`
 
@@ -84,7 +80,7 @@ Workflow при push в `main`:
 3. загружает `dist/` как GitHub Pages artifact;
 4. публикует artifact в environment `github-pages`.
 
-В настройках репозитория нужно выбрать:
+В настройках репозитория используется:
 
 **Settings -> Pages -> Build and deployment -> Source -> GitHub Actions**.
 
