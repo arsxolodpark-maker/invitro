@@ -3,7 +3,9 @@
 :root {
   --invitro-teal: #0099a8;
   --invitro-teal-dark: #007f8a;
+  --invitro-teal-deep: #006b74;
   --invitro-teal-soft: #e9f8f8;
+  --invitro-teal-soft-2: #d8f1f1;
   --invitro-teal-pale: #f5fbfb;
   --invitro-ink: #17383d;
   --invitro-line: #dce9e9;
@@ -29,48 +31,77 @@ body {
   color: #15383d;
 }
 
-/* INVITRO-inspired visual mapping for the existing Tailwind UI.
-   Business logic and component structure stay untouched. */
+/*
+ * INVITRO-inspired design system bridge.
+ * Existing screens keep their business logic and Tailwind structure,
+ * while legacy blue/indigo/purple accents are normalized to the same
+ * teal corporate visual language used on the dashboard and header.
+ */
+
+/* Primary blue -> INVITRO teal */
 .bg-blue-600 { background-color: var(--invitro-teal) !important; }
+.bg-blue-500 { background-color: #0aa7b4 !important; }
+.bg-blue-100 { background-color: var(--invitro-teal-soft-2) !important; }
+.bg-blue-50 { background-color: var(--invitro-teal-soft) !important; }
+.bg-blue-50\/50 { background-color: rgba(233, 248, 248, .74) !important; }
+.bg-blue-500\/20 { background-color: rgba(0, 153, 168, .18) !important; }
+.bg-blue-950\/40 { background-color: rgba(0, 74, 81, .38) !important; }
+
+.text-blue-900 { color: #005c64 !important; }
+.text-blue-800 { color: #006e77 !important; }
+.text-blue-700 { color: var(--invitro-teal-dark) !important; }
+.text-blue-600 { color: var(--invitro-teal) !important; }
+.text-blue-400 { color: #36bac3 !important; }
+.text-blue-300 { color: #7fd5da !important; }
+.text-blue-200 { color: #b7e8e9 !important; }
+
+.border-blue-600 { border-color: var(--invitro-teal) !important; }
+.border-blue-500\/30 { border-color: rgba(0, 153, 168, .32) !important; }
+.border-blue-400\/30 { border-color: rgba(0, 153, 168, .28) !important; }
+.border-blue-300 { border-color: #9cd6d8 !important; }
+.border-blue-200 { border-color: #b9e3e4 !important; }
+.border-blue-100 { border-color: #d3eeee !important; }
+.border-blue-900\/50 { border-color: rgba(0, 104, 113, .48) !important; }
+
+.ring-blue-100 { --tw-ring-color: rgba(0, 153, 168, .16) !important; }
+.ring-blue-500 { --tw-ring-color: rgba(0, 153, 168, .34) !important; }
+.focus\:ring-blue-500:focus { --tw-ring-color: rgba(0, 153, 168, .34) !important; }
+
 .hover\:bg-blue-500:hover { background-color: #008b98 !important; }
 .hover\:bg-blue-600:hover { background-color: var(--invitro-teal-dark) !important; }
-.text-blue-600 { color: var(--invitro-teal) !important; }
-.text-blue-700 { color: var(--invitro-teal-dark) !important; }
-.text-blue-800 { color: #006e77 !important; }
-.hover\:text-blue-800:hover { color: #006e77 !important; }
-.bg-blue-50 { background-color: var(--invitro-teal-soft) !important; }
-.bg-blue-100 { background-color: #d8f1f1 !important; }
-.border-blue-200 { border-color: #b9e3e4 !important; }
-.border-blue-300 { border-color: #9cd6d8 !important; }
-.focus\:ring-blue-500:focus { --tw-ring-color: rgba(0,153,168,.33) !important; }
-.hover\:bg-blue-50\/40:hover { background-color: rgba(233,248,248,.72) !important; }
+.hover\:bg-blue-50:hover { background-color: #e4f6f6 !important; }
+.hover\:bg-blue-50\/40:hover { background-color: rgba(233, 248, 248, .72) !important; }
+.hover\:text-blue-600:hover { color: var(--invitro-teal) !important; }
+.hover\:text-blue-800:hover { color: var(--invitro-teal-deep) !important; }
 
-/* A calmer corporate surface language. */
+/* Legacy indigo/purple UI accents -> secondary teal tones */
+.bg-indigo-100, .bg-purple-100 { background-color: #e3f5f5 !important; }
+.bg-indigo-50, .bg-purple-50 { background-color: #f0fafa !important; }
+.text-indigo-800, .text-purple-800 { color: #176f77 !important; }
+.text-indigo-700, .text-purple-700 { color: #247b83 !important; }
+.text-indigo-600, .text-purple-600 { color: #2a9098 !important; }
+.border-indigo-200, .border-purple-200 { border-color: #c9e7e8 !important; }
+
+/* Corporate surfaces */
+.shadow-2xs,
 .shadow-xs,
 .shadow-sm {
   box-shadow: 0 5px 18px rgba(24, 74, 79, 0.055) !important;
 }
 
-.bg-slate-100 {
-  background-color: #f3f8f8;
-}
+.bg-slate-100 { background-color: #f3f8f8 !important; }
+.bg-slate-50 { background-color: #f7fbfb !important; }
+.bg-slate-50\/60 { background-color: rgba(247, 251, 251, .72) !important; }
+.bg-slate-50\/80 { background-color: rgba(247, 251, 251, .9) !important; }
+.border-slate-200 { border-color: #dfe9e9 !important; }
+.border-slate-100 { border-color: #edf3f3 !important; }
+.text-slate-900 { color: #17383d !important; }
+.text-slate-800 { color: #23474c !important; }
+.text-slate-700 { color: #36575b !important; }
+.text-slate-600 { color: #536c70 !important; }
+.text-slate-500 { color: #6c7f82 !important; }
 
-.border-slate-200 {
-  border-color: #dfe9e9;
-}
-
-.text-slate-900 {
-  color: #17383d;
-}
-
-.text-slate-800 {
-  color: #23474c;
-}
-
-.text-slate-500 {
-  color: #6c7f82;
-}
-
+/* Consistent controls across every screen */
 input,
 select,
 textarea,
@@ -78,10 +109,30 @@ button {
   font: inherit;
 }
 
+input,
+select,
+textarea {
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: rgba(0,153,168,.62) !important;
+  border-color: rgba(0, 153, 168, .62) !important;
+  box-shadow: 0 0 0 3px rgba(0, 153, 168, .10);
+}
+
+/* Tables and cards should feel like one product, not separate prototypes. */
+table thead tr {
+  background-color: #f5fafa;
+}
+
+table tbody tr {
+  transition: background-color .15s ease;
+}
+
+table tbody tr:hover {
+  background-color: rgba(233, 248, 248, .46);
 }
 
 @keyframes fadeIn {
