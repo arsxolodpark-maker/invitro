@@ -1,6 +1,6 @@
 /**
  * Main Application Component
- * PRIIZ INVITRO UX Prototype v0.3 DEMO
+ * PRIIZ INVITRO UX Prototype v0.4 DEMO
  */
 
 import React, { useState, useEffect } from 'react';
@@ -25,7 +25,6 @@ import { ReadmeModal } from './components/ReadmeModal';
 import { IntegrationConsoleModal } from './components/IntegrationConsoleModal';
 
 export default function App() {
-  // State
   const [currentRole, setCurrentRole] = useState<UserRole>('ДКП');
   const [activeView, setActiveView] = useState<'home' | 'select-type' | 'form' | 'detail' | 'analytics' | 'readme'>('home');
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
@@ -33,7 +32,6 @@ export default function App() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [consoleInz, setConsoleInz] = useState<string | null>(null);
 
-  // Load incidents on mount
   useEffect(() => {
     setIncidents(getIncidents());
   }, []);
@@ -42,7 +40,6 @@ export default function App() {
     setIncidents(getIncidents());
   };
 
-  // Handlers
   const handleRoleChange = (newRole: UserRole) => {
     setCurrentRole(newRole);
     if (newRole === 'Product' && activeView !== 'analytics' && activeView !== 'readme') {
@@ -107,8 +104,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col">
-      
-      {/* App Header */}
       <Header
         currentRole={currentRole}
         onRoleChange={handleRoleChange}
@@ -118,10 +113,7 @@ export default function App() {
         currentIncidentId={selectedIncidentId || undefined}
       />
 
-      {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        
-        {/* Screen 1: Home Dashboard */}
         {activeView === 'home' && (
           <MainDashboard
             incidents={incidents}
@@ -132,7 +124,6 @@ export default function App() {
           />
         )}
 
-        {/* Screen 2: Type Selection */}
         {activeView === 'select-type' && (
           <IncidentTypeSelect
             onSelectType={handleSelectType}
@@ -140,7 +131,6 @@ export default function App() {
           />
         )}
 
-        {/* Screen 3: Form */}
         {activeView === 'form' && (
           <IncidentForm
             currentRole={currentRole}
@@ -149,7 +139,6 @@ export default function App() {
           />
         )}
 
-        {/* Screen 4: Detail Card */}
         {activeView === 'detail' && selectedIncident && (
           <IncidentDetailCard
             incident={selectedIncident}
@@ -162,19 +151,15 @@ export default function App() {
           />
         )}
 
-        {/* Screen 5: Analytics */}
         {activeView === 'analytics' && (
           <AnalyticsView />
         )}
 
-        {/* Readme / Architecture View */}
         {activeView === 'readme' && (
           <ReadmeModal onBack={() => setActiveView('home')} />
         )}
-
       </main>
 
-      {/* Demo Integration Console Modal for Support */}
       {consoleInz && (
         <IntegrationConsoleModal
           inz={consoleInz}
@@ -182,20 +167,18 @@ export default function App() {
         />
       )}
 
-      {/* Global Footer */}
-      <footer className="bg-white border-t border-slate-200 py-4 mt-auto">
+      <footer className="bg-white border-t border-[#dfeaea] py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-slate-800">ПРИИЗ INVITRO UX Prototype v0.3 DEMO</span>
+            <span className="font-bold text-[#17383d]">ПРИИЗ INVITRO UX Prototype v0.4 DEMO</span>
             <span>•</span>
-            <span>Автономный пользовательский слой</span>
+            <span>Пользовательский слой домена «Сервис»</span>
           </div>
           <div className="text-slate-400 text-[11px]">
-            Все данные вымышлены (DEMO DATA). Не использует реальные медицинские или ПДн данные.
+            Все данные вымышлены (DEMO DATA). Реальные медицинские и ПДн данные не используются.
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
