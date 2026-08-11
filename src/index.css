@@ -1,5 +1,89 @@
 @import "tailwindcss";
 
+:root {
+  --invitro-teal: #0099a8;
+  --invitro-teal-dark: #007f8a;
+  --invitro-teal-soft: #e9f8f8;
+  --invitro-teal-pale: #f5fbfb;
+  --invitro-ink: #17383d;
+  --invitro-line: #dce9e9;
+  --invitro-muted: #62767a;
+}
+
+html {
+  background: var(--invitro-teal-pale);
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(0, 153, 168, 0.055), transparent 28rem),
+    #f7fbfb;
+  color: var(--invitro-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #cceeee;
+  color: #15383d;
+}
+
+/* INVITRO-inspired visual mapping for the existing Tailwind UI.
+   Business logic and component structure stay untouched. */
+.bg-blue-600 { background-color: var(--invitro-teal) !important; }
+.hover\:bg-blue-500:hover { background-color: #008b98 !important; }
+.hover\:bg-blue-600:hover { background-color: var(--invitro-teal-dark) !important; }
+.text-blue-600 { color: var(--invitro-teal) !important; }
+.text-blue-700 { color: var(--invitro-teal-dark) !important; }
+.text-blue-800 { color: #006e77 !important; }
+.hover\:text-blue-800:hover { color: #006e77 !important; }
+.bg-blue-50 { background-color: var(--invitro-teal-soft) !important; }
+.bg-blue-100 { background-color: #d8f1f1 !important; }
+.border-blue-200 { border-color: #b9e3e4 !important; }
+.border-blue-300 { border-color: #9cd6d8 !important; }
+.focus\:ring-blue-500:focus { --tw-ring-color: rgba(0,153,168,.33) !important; }
+.hover\:bg-blue-50\/40:hover { background-color: rgba(233,248,248,.72) !important; }
+
+/* A calmer corporate surface language. */
+.shadow-xs,
+.shadow-sm {
+  box-shadow: 0 5px 18px rgba(24, 74, 79, 0.055) !important;
+}
+
+.bg-slate-100 {
+  background-color: #f3f8f8;
+}
+
+.border-slate-200 {
+  border-color: #dfe9e9;
+}
+
+.text-slate-900 {
+  color: #17383d;
+}
+
+.text-slate-800 {
+  color: #23474c;
+}
+
+.text-slate-500 {
+  color: #6c7f82;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(0,153,168,.62) !important;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -17,4 +101,3 @@
 .animate-scale-in {
   animation: scaleIn 0.15s ease-out forwards;
 }
-
