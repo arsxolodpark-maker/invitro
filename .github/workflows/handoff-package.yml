@@ -1,0 +1,33 @@
+name: Build handoff package
+
+on:
+  push:
+    branches:
+      - handoff/priiz-v0.4-demo
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create source package
+        run: |
+          mkdir -p out
+          zip -r out/PRIIZ_v0.4_source.zip . \
+            -x '.git/*' \
+            -x 'node_modules/*' \
+            -x 'dist/*' \
+            -x 'out/*'
+
+      - name: Upload source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: PRIIZ-v0.4-source
+          path: out/PRIIZ_v0.4_source.zip
+          retention-days: 7
