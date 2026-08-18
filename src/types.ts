@@ -1,9 +1,9 @@
 /**
- * ПРИИЗ INVITRO UX Prototype v0.2
+ * ПРИИЗ INVITRO UX Prototype v0.5
  * Core TypeScript Data Models
  */
 
-export type UserRole = 'ДКП' | 'Manager' | 'Project' | 'Product' | 'Support';
+export type UserRole = 'Администратор' | 'ДКП' | 'Project' | 'Support';
 
 export type IncidentType = 'INC-01' | 'INC-02' | 'INC-03' | 'INC-05' | 'OTHER';
 
@@ -58,7 +58,7 @@ export interface AttachmentMeta {
 }
 
 export interface Incident {
-  id: string; // e.g. PRIIZ-000245
+  id: string;
   incidentType: IncidentType;
   source: string;
   createdAt: string;
@@ -66,11 +66,10 @@ export interface Incident {
   authorRole: UserRole;
   status: IncidentStatus;
   priority: 'Низкий' | 'Средний' | 'Высокий' | 'Критический';
-  responsibleTeam: string; // e.g. "Support"
+  responsibleTeam: string;
   assignee?: string;
-  internalServiceDeskId?: string; // TBD / existing capability
-  
-  // Client & Vendor Context
+  internalServiceDeskId?: string;
+
   client: string;
   clientCode: string;
   contract?: string;
@@ -78,29 +77,24 @@ export interface Incident {
   vendor: string;
   integrationType: IntegrationType;
   environment: 'Production' | 'Test';
-  
-  // Incident specific data
+
   inz: string;
   eventDateTime: string;
   scope: ProblemScope;
   workedBefore: WorkedBefore;
   description: string;
-  
-  // Vendor verification
+
   vendorContacted: boolean;
   vendorAnswer?: string;
   attachments: AttachmentMeta[];
-  
-  // Diagnostic and interaction
+
   diagnosticResult?: DiagnosticResult;
   comments: IncidentComment[];
-  
-  // Metrics & Process indicators
+
   fullDataOnFirstSubmit: boolean;
   clarificationCount: number;
   slaStatus: 'В норме (демо)' | 'Превышен (демо)' | 'Риск нарушения (демо)';
-  
-  // Resolution metadata
+
   rootCause?: string;
   resolution?: string;
   resolvedAt?: string;
@@ -108,13 +102,13 @@ export interface Incident {
 }
 
 export interface IncidentMetrics {
-  firstTimeCompletenessRate: number; // e.g. 84.5
-  avgClarificationCount: number; // e.g. 0.4
-  avgTimeToFullDataMinutes: number; // e.g. 12
-  selfServiceRate: number; // e.g. 38.2
-  mttrMinutes: number; // e.g. 42
-  repeatIncidentRate: number; // e.g. 4.1
-  nonPriizIncidentShare: number; // e.g. 18
+  firstTimeCompletenessRate: number;
+  avgClarificationCount: number;
+  avgTimeToFullDataMinutes: number;
+  selfServiceRate: number;
+  mttrMinutes: number;
+  repeatIncidentRate: number;
+  nonPriizIncidentShare: number;
   typeBreakdown: {
     type: string;
     label: string;
