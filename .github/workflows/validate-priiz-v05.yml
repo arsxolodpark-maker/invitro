@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/irina-feedback-v0.5
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
