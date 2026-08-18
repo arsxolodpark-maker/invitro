@@ -1,6 +1,6 @@
 /**
  * Main Application Component
- * PRIIZ INVITRO UX Prototype v0.5 DEMO
+ * INVITRO Unified DKP Portal Prototype v0.6 DEMO
  */
 
 import React, { useState, useEffect } from 'react';
@@ -17,6 +17,7 @@ import {
 
 import { Header, AppView } from './components/Header';
 import { MainDashboard } from './components/MainDashboard';
+import { DirectionCheckView } from './components/DirectionCheckView';
 import { IncidentTypeSelect } from './components/IncidentTypeSelect';
 import { IncidentForm } from './components/IncidentForm';
 import { IncidentDetailCard } from './components/IncidentDetailCard';
@@ -33,10 +34,7 @@ export default function App() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [consoleInz, setConsoleInz] = useState<string | null>(null);
 
-  useEffect(() => {
-    setIncidents(getIncidents());
-  }, []);
-
+  useEffect(() => { setIncidents(getIncidents()); }, []);
   const refreshIncidents = () => setIncidents(getIncidents());
 
   const handleRoleChange = (newRole: UserRole) => {
@@ -45,7 +43,7 @@ export default function App() {
     setActiveView(newRole === 'Администратор' ? 'admin' : 'home');
   };
 
-  const handleNavigate = (view: 'home' | 'analytics' | 'knowledge' | 'admin') => {
+  const handleNavigate = (view: 'home' | 'direction-check' | 'analytics' | 'knowledge' | 'admin') => {
     setActiveView(view);
     setSelectedIncidentId(null);
   };
@@ -67,25 +65,10 @@ export default function App() {
     setActiveView('detail');
   };
 
-  const handleSelectIncident = (id: string) => {
-    setSelectedIncidentId(id);
-    setActiveView('detail');
-  };
-
-  const handleAddComment = (id: string, text: string) => {
-    addIncidentComment(id, `Пользователь (${currentRole})`, currentRole, text);
-    refreshIncidents();
-  };
-
-  const handleConfirmReceipt = (id: string) => {
-    confirmResultReceipt(id, `Пользователь (${currentRole})`, currentRole);
-    refreshIncidents();
-  };
-
-  const handleCloseIncident = (id: string, rootCause: string, resolution: string) => {
-    closeIncident(id, `Пользователь (${currentRole})`, rootCause, resolution);
-    refreshIncidents();
-  };
+  const handleSelectIncident = (id: string) => { setSelectedIncidentId(id); setActiveView('detail'); };
+  const handleAddComment = (id: string, text: string) => { addIncidentComment(id, `Пользователь (${currentRole})`, currentRole, text); refreshIncidents(); };
+  const handleConfirmReceipt = (id: string) => { confirmResultReceipt(id, `Пользователь (${currentRole})`, currentRole); refreshIncidents(); };
+  const handleCloseIncident = (id: string, rootCause: string, resolution: string) => { closeIncident(id, `Пользователь (${currentRole})`, rootCause, resolution); refreshIncidents(); };
 
   const handleResetDemoData = () => {
     if (window.confirm('Сбросить все изменения к первоначальным демо-данным?')) {
@@ -103,14 +86,11 @@ export default function App() {
       <Header currentRole={currentRole} onRoleChange={handleRoleChange} activeView={activeView} onNavigate={handleNavigate} onResetData={handleResetDemoData} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {activeView === 'home' && currentRole !== 'Администратор' && (
-          <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />
-        )}
+        {activeView === 'home' && currentRole !== 'Администратор' && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
+        {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
         {activeView === 'select-type' && currentRole !== 'Администратор' && <IncidentTypeSelect onSelectType={handleSelectType} onBack={() => setActiveView('home')} />}
         {activeView === 'form' && currentRole !== 'Администратор' && <IncidentForm currentRole={currentRole} onBack={() => setActiveView('select-type')} onSubmit={handleCreateSubmit} />}
-        {activeView === 'detail' && selectedIncident && currentRole !== 'Администратор' && (
-          <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} />
-        )}
+        {activeView === 'detail' && selectedIncident && currentRole !== 'Администратор' && <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} />}
         {activeView === 'analytics' && currentRole === 'Project' && <AnalyticsView />}
         {activeView === 'knowledge' && currentRole !== 'Администратор' && <KnowledgeBaseView />}
         {activeView === 'admin' && currentRole === 'Администратор' && <AdminView />}
@@ -120,8 +100,8 @@ export default function App() {
 
       <footer className="bg-white border-t border-[#dfeaea] py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-          <div className="flex items-center space-x-2"><span className="font-bold text-[#17383d]">ПРИИЗ INVITRO UX Prototype v0.5 DEMO</span><span>•</span><span>Модуль единого рабочего портала</span></div>
-          <div className="text-slate-400 text-[11px]">Все данные вымышлены (DEMO DATA). Реальные медицинские и ПДн данные не используются.</div>
+          <div className="flex items-center space-x-2"><span className="font-bold text-[#17383d]">INVITRO Unified DKP Portal v0.6 DEMO</span><span>•</span><span>GOVIN + ПРИИЗ</span></div>
+          <div className="text-slate-400 text-[11px]">Все данные вымышлены. Реальные API, медицинские данные и ПДн не используются.</div>
         </div>
       </footer>
     </div>
