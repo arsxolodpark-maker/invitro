@@ -5,20 +5,19 @@
 
 export type UserRole = 'Администратор' | 'ДКП' | 'Project' | 'Support';
 
-export type IncidentType = 'INC-01' | 'INC-02' | 'INC-03' | 'INC-05' | 'OTHER';
+// До получения реальной статистики поддержки утвержден только рабочий DEMO-сценарий INC-02.
+export type IncidentType = 'INC-02' | 'OTHER';
 
-export type IncidentStatus = 
-  | 'Новый' 
-  | 'В работе' 
-  | 'Требует уточнения' 
-  | 'Ожидает подтверждения ДКП' 
-  | 'Решен' 
+export type IncidentStatus =
+  | 'Новый'
+  | 'В работе'
+  | 'Требует уточнения'
+  | 'Ожидает подтверждения ДКП'
+  | 'Решен'
   | 'Закрыт';
 
 export type IntegrationType = 'типовая' | 'кастомная';
-
 export type ProblemScope = 'единичная' | 'несколько' | 'массовая' | 'неизвестно';
-
 export type WorkedBefore = 'да' | 'нет' | 'неизвестно';
 
 export interface DiagnosticStage {
