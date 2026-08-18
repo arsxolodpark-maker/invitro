@@ -1,0 +1,22 @@
+name: Validate GOVIN + PRIIZ v0.6
+
+on:
+  push:
+    branches:
+      - feature/govin-priiz-v0.6
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run lint
+      - run: npm run build
