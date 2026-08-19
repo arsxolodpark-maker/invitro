@@ -1,9 +1,14 @@
 /**
- * Existing Service Desk / Itilium Adapter contract for the UX prototype.
+ * 1C:ITILIUM adapter contract for the UX prototype.
  *
- * Irina confirmed the target direction: PRIIZ should synchronize with Itilium so Support
- * can continue working in the established contour without duplicate work in the portal.
- * The real API, authentication, source of truth and status mapping remain TBD.
+ * Confirmed by analytics v9:
+ * - create incident;
+ * - fetch incidents by parameters;
+ * - fetch incident status;
+ * - register/check/update organization;
+ * - register initiator.
+ *
+ * The exact production contract for two-way comment synchronization remains TBD.
  */
 
 import { Incident } from '../types';
@@ -24,7 +29,7 @@ export interface ServiceDeskAdapter {
   }>;
 }
 
-/** Mock only. No real Itilium or INVITRO API is called. */
+/** DEMO only. No real 1C:ITILIUM or INVITRO API is called. */
 export class MockServiceDeskAdapter implements ServiceDeskAdapter {
   async syncWithServiceDesk(_incident: Incident) {
     await new Promise((resolve) => setTimeout(resolve, 300));
