@@ -1,6 +1,6 @@
 {
-  "name": "ПРИИЗ INVITRO v0.3 DEMO",
-  "description": "Демонстрационный UX-прототип пользовательского слоя управления инцидентами интеграций INVITRO",
+  "name": "ПРИИЗ INVITRO v0.7 DEMO",
+  "description": "UX-прототип ПРИИЗ: внешний Инициатор, единый фронт ДКП, 1C:ITILIUM и Express",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
