@@ -10,7 +10,7 @@ import { Header, AppView } from './components/Header';
 import { MainDashboard } from './components/MainDashboard';
 import { DirectionCheckView } from './components/DirectionCheckView';
 import { IncidentTypeSelect } from './components/IncidentTypeSelect';
-import { IncidentForm } from './components/IncidentForm';
+import { IncidentFormV07 } from './components/IncidentFormV07';
 import { IncidentDetailCard } from './components/IncidentDetailCard';
 import { AnalyticsView } from './components/AnalyticsView';
 import { KnowledgeBaseView } from './components/KnowledgeBaseView';
@@ -75,7 +75,7 @@ export default function App() {
         {activeView === 'home' && !isInitiator && !isAdmin && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
         {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
         {activeView === 'select-type' && !isAdmin && <IncidentTypeSelect onSelectType={handleSelectType} onBack={() => setActiveView('home')} />}
-        {activeView === 'form' && !isAdmin && <IncidentForm currentRole={currentRole} onBack={() => setActiveView('select-type')} onSubmit={handleCreateSubmit} />}
+        {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} onBack={() => setActiveView('select-type')} onSubmit={handleCreateSubmit} />}
         {activeView === 'detail' && selectedIncident && !isAdmin && <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} />}
         {activeView === 'analytics' && currentRole === 'Project' && <AnalyticsView />}
         {activeView === 'knowledge' && !isInitiator && !isAdmin && <KnowledgeBaseView />}
