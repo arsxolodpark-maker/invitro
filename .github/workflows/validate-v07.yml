@@ -3,6 +3,7 @@ name: Validate PRIIZ v0.7
 on:
   push:
     branches:
+      - main
       - feature/priiz-v0.7
   pull_request:
     branches:
