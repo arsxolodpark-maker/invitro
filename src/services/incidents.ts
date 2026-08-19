@@ -20,13 +20,27 @@ export function createIncident(data: Omit<Incident, 'id' | 'createdAt' | 'commen
     ...data,
     id: newId,
     createdAt: new Date().toISOString(),
-    status: 'Новый',
-    comments: [{ id: `c-${Date.now()}`, author: data.createdBy, role: data.authorRole, content: `Обращение создано в ПРИИЗ. Тип: ${data.incidentType}, ИНЗ: ${data.inz}.`, createdAt: new Date().toISOString() }],
+    status: 'Новое',
+    comments: [{
+      id: `c-${Date.now()}`,
+      author: data.createdBy,
+      role: data.authorRole,
+      content: `Обращение создано в ПРИИЗ. Тип: ${data.incidentType}, ИНЗ: ${data.inz}.`,
+      createdAt: new Date().toISOString(),
+    }],
   };
 
-  // DEMO adapter models the future exchange with the existing Service Desk / Itilium contour.
+  // DEMO: отражает подтвержденный целевой обмен ПРИИЗ -> 1C:ITILIUM.
   serviceDeskAdapter.syncWithServiceDesk(newIncident).then((res) => {
     newIncident.internalServiceDeskId = res.internalTicketId;
+    newIncident.comments.push({
+      id: `c-${Date.now()}-itilium`,
+      author: 'ПРИИЗ',
+      role: 'Администратор',
+      content: `DEMO: обращение зарегистрировано в 1C:ITILIUM, номер ${res.internalTicketId}.`,
+      createdAt: res.syncedAt,
+      isInternal: true,
+    });
     incidentRepository.save(newIncident);
   });
 
@@ -38,9 +52,11 @@ export function addIncidentComment(incidentId: string, author: string, role: Use
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
 
   const newComment: IncidentComment = { id: `c-${Date.now()}`, author, role, content, createdAt: new Date().toISOString(), isInternal };
-  if (role === 'Support' && content.toLowerCase().includes('уточн')) {
+  if ((role === 'Инженер ГСТИ' || role === 'Support') && content.toLowerCase().includes('уточн')) {
     incident.clarificationCount = (incident.clarificationCount || 0) + 1;
-    incident.status = 'Требует уточнения';
+    incident.status = 'Ожидает ответа';
+  } else if (role === 'Инженер ГСТИ' || role === 'Support') {
+    incident.status = 'В работе';
   }
   incident.comments.push(newComment);
   return incidentRepository.save(incident);
@@ -57,8 +73,14 @@ export function confirmResultReceipt(incidentId: string, authorName: string, rol
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
 
-  incident.status = 'Ожидает подтверждения ДКП';
-  incident.comments.push({ id: `c-${Date.now()}`, author: authorName, role, content: 'Получение результата подтверждено. Обращение ожидает финального закрытия Support.', createdAt: new Date().toISOString() });
+  incident.status = 'Выполнено';
+  incident.comments.push({
+    id: `c-${Date.now()}`,
+    author: authorName,
+    role,
+    content: 'Результат подтвержден пользователем. Обращение переведено в статус «Выполнено».',
+    createdAt: new Date().toISOString(),
+  });
   return incidentRepository.save(incident);
 }
 
@@ -68,10 +90,16 @@ export function closeIncident(incidentId: string, authorName: string, rootCause:
 
   incident.status = 'Закрыт';
   incident.rootCause = rootCause || 'Причина TBD';
-  incident.resolution = resolution || 'Решение зафиксировано Support';
+  incident.resolution = resolution || 'Решение зафиксировано инженером';
   incident.resolvedAt = new Date().toISOString();
   incident.reusableKnowledge = true;
-  incident.comments.push({ id: `c-${Date.now()}`, author: authorName, role: 'Support', content: `Инцидент закрыт. Причина: [${incident.rootCause}]. Решение: ${incident.resolution}`, createdAt: new Date().toISOString() });
+  incident.comments.push({
+    id: `c-${Date.now()}`,
+    author: authorName,
+    role: 'Инженер ГСТИ',
+    content: `Обращение закрыто. Причина: [${incident.rootCause}]. Решение: ${incident.resolution}`,
+    createdAt: new Date().toISOString(),
+  });
   return incidentRepository.save(incident);
 }
 
@@ -87,6 +115,7 @@ export function getProductMetrics(): IncidentMetrics {
   const totalClarifications = allIncidents.reduce((acc, i) => acc + (i.clarificationCount || 0), 0);
   const avgClarificationCount = total > 0 ? Math.round((totalClarifications / total) * 10) / 10 : 0;
 
+  // Все численные значения ниже остаются DEMO до получения фактического baseline.
   return {
     firstTimeCompletenessRate,
     avgClarificationCount,
@@ -95,6 +124,6 @@ export function getProductMetrics(): IncidentMetrics {
     mttrMinutes: 42,
     repeatIncidentRate: 4.1,
     nonPriizIncidentShare: 18,
-    typeBreakdown: [{ type: 'INC-02', label: 'Не получен результат', count: total, mttrMinutes: 42, repeatRate: 4.1, responsibleTeam: 'Support' }],
+    typeBreakdown: [{ type: 'INC-02', label: 'Не получен результат', count: total, mttrMinutes: 42, repeatRate: 4.1, responsibleTeam: 'Инженер ГСТИ' }],
   };
 }
