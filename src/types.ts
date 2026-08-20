@@ -66,6 +66,7 @@ export interface Incident {
   source: string;
   createdAt: string;
   createdBy: string;
+  initiatorEmail?: string;
   authorRole: UserRole;
   status: IncidentStatus;
   priority: 'Низкий' | 'Средний' | 'Высокий' | 'Критический';
