@@ -4,14 +4,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Incident, IncidentStatus, IncidentType, UserRole } from './types';
+import { Incident, IncidentStatus, UserRole } from './types';
 import { addIncidentComment, closeIncident, confirmResultReceipt, createIncident, getIncidentById, getIncidents, resetDemoData, updateIncidentStatus } from './services/incidents';
 import { resetInitiators } from './services/users';
 import { Header, AppView } from './components/Header';
 import { MainDashboard } from './components/MainDashboard';
 import { DirectionCheckView } from './components/DirectionCheckView';
 import { DkpInitiatorsView } from './components/DkpInitiatorsView';
-import { IncidentTypeSelect } from './components/IncidentTypeSelect';
 import { IncidentFormV07 } from './components/IncidentFormV07';
 import { IncidentDetailCard } from './components/IncidentDetailCard';
 import { AnalyticsView } from './components/AnalyticsView';
@@ -24,7 +23,6 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ДКП');
   const [activeView, setActiveView] = useState<AppView>('home');
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<IncidentType | null>(null);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [consoleInz, setConsoleInz] = useState<string | null>(null);
 
@@ -35,7 +33,7 @@ export default function App() {
     setCurrentRole(newRole);
     setSelectedIncidentId(null);
     setConsoleInz(null);
-    setActiveView(newRole === 'Администратор' ? 'admin' : 'home');
+    setActiveView(newRole === 'Администратор' ? 'admin' : newRole === 'Project' ? 'analytics' : 'home');
   };
 
   const handleNavigate = (view: 'home' | 'direction-check' | 'initiators' | 'analytics' | 'knowledge' | 'admin') => {
@@ -43,8 +41,9 @@ export default function App() {
     setSelectedIncidentId(null);
   };
 
-  const handleStartCreateIncident = () => { setActiveView('select-type'); setSelectedType(null); };
-  const handleSelectType = (type: IncidentType) => { setSelectedType(type); if (type === 'INC-02') setActiveView('form'); };
+  // Пока подтвержден один пользовательский сценарий INC-02, поэтому не заставляем пользователя
+  // проходить пустой шаг выбора категории. Каталог вернется, когда появится подтвержденная статистика типов.
+  const handleStartCreateIncident = () => setActiveView('form');
 
   const handleCreateSubmit = (data: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>) => {
     const created = createIncident(data);
@@ -67,7 +66,7 @@ export default function App() {
       resetDemoData();
       resetInitiators();
       refreshIncidents();
-      setActiveView(currentRole === 'Администратор' ? 'admin' : 'home');
+      setActiveView(currentRole === 'Администратор' ? 'admin' : currentRole === 'Project' ? 'analytics' : 'home');
       setSelectedIncidentId(null);
       window.location.reload();
     }
@@ -87,8 +86,7 @@ export default function App() {
         {activeView === 'home' && !isInitiator && !isAdmin && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
         {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
         {activeView === 'initiators' && currentRole === 'ДКП' && <DkpInitiatorsView />}
-        {activeView === 'select-type' && !isAdmin && <IncidentTypeSelect onSelectType={handleSelectType} onBack={() => setActiveView('home')} />}
-        {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} onBack={() => setActiveView('select-type')} onSubmit={handleCreateSubmit} />}
+        {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} onBack={() => setActiveView('home')} onSubmit={handleCreateSubmit} />}
         {activeView === 'detail' && selectedIncident && !isAdmin && <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} onStatusChange={handleStatusChange} />}
         {activeView === 'analytics' && currentRole === 'Project' && <AnalyticsView />}
         {activeView === 'knowledge' && !isInitiator && !isAdmin && <KnowledgeBaseView />}
