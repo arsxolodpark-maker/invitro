@@ -33,12 +33,18 @@ export function addIncidentComment(incidentId: string, author: string, role: Use
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
   const newComment: IncidentComment = { id: `c-${Date.now()}`, author, role, content, createdAt: new Date().toISOString(), isInternal };
-  if ((role === 'Инженер ГСТИ' || role === 'Support') && content.toLowerCase().includes('уточн')) {
-    incident.clarificationCount = (incident.clarificationCount || 0) + 1;
-    incident.status = 'Ожидает ответа';
-  } else if (role === 'Инженер ГСТИ' || role === 'Support') {
+
+  if (role === 'Инженер ГСТИ' || role === 'Support') {
+    if (content.toLowerCase().includes('уточн')) {
+      incident.clarificationCount = (incident.clarificationCount || 0) + 1;
+      incident.status = 'Ожидает ответа';
+    } else if (incident.status === 'Новое' || incident.status === 'Ожидает ответа') {
+      incident.status = 'В работе';
+    }
+  } else if ((role === 'Инициатор' || role === 'ДКП') && incident.status === 'Ожидает ответа') {
     incident.status = 'В работе';
   }
+
   incident.comments.push(newComment);
   return incidentRepository.save(incident);
 }
@@ -49,13 +55,7 @@ export function updateIncidentStatus(incidentId: string, status: IncidentStatus)
   if (incident.status === status) return incident;
   incident.status = status;
   if (status !== 'Выполнено') incident.resultConfirmed = false;
-  incident.comments.push({
-    id: `c-${Date.now()}-status`,
-    author: '1C:ITILIUM → ПРИИЗ',
-    role: 'Инженер ГСТИ',
-    content: `Статус обращения изменен на «${status}».`,
-    createdAt: new Date().toISOString(),
-  });
+  incident.comments.push({ id: `c-${Date.now()}-status`, author: '1C:ITILIUM → ПРИИЗ', role: 'Инженер ГСТИ', content: `Статус обращения изменен на «${status}».`, createdAt: new Date().toISOString() });
   return incidentRepository.save(incident);
 }
 
