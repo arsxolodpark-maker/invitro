@@ -5,7 +5,7 @@ import { searchDirection } from './service';
 import { GovinDirection, GovinIntegration, GovinPriizContext, GovinSearchState } from './types';
 
 interface DirectionCheckViewProps {
-  onCreateIncident: () => void;
+  onCreateIncident: (context: GovinPriizContext) => void;
 }
 
 const integrations: GovinIntegration[] = ['Нетрика', 'Адыгея', 'Брегис'];
@@ -19,7 +19,7 @@ const stageLabel: Record<GovinDirection['uiStage'], string> = {
 
 const actionText: Record<GovinDirection['uiStage'], string> = {
   RECEIVED: 'Направление получено внешним контуром. Если клиент ожидает дальнейшее движение, можно передать контекст в ПРИИЗ для разбора.',
-  CHECKIN: 'Проверьте диагностическую ошибку. При необходимости передайте контекст в ПРИИЗ без повторного ввода данных.',
+  CHECKIN: 'Проверьте диагностическую ошибку. При необходимости передайте контекст в ПРИИЗ без повторного ввода доступных данных GOVIN.',
   IN_PROGRESS: 'Направление находится в работе. Если ожидаемый срок нарушен, передайте контекст в ПРИИЗ.',
   DELIVERY: 'Проверьте доставленные тесты и ошибки доставки. Если проблема есть, передайте контекст в ПРИИЗ.',
 };
@@ -54,13 +54,14 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
     [integration],
   );
 
-  const runSearch = async (nextIntegration: GovinIntegration = integration as GovinIntegration) => {
-    if (!nextIntegration || !barcode.trim()) return;
-    setIntegration(nextIntegration);
+  const runSearch = async (nextIntegration?: GovinIntegration) => {
+    const targetIntegration = nextIntegration ?? integration;
+    if (!targetIntegration || !barcode.trim()) return;
+    setIntegration(targetIntegration);
     setSearchState('loading');
     setResult(null);
     try {
-      const found = await searchDirection(nextIntegration, barcode);
+      const found = await searchDirection(targetIntegration, barcode);
       setResult(found);
       setSearchState(found ? 'success' : 'not_found');
     } catch {
@@ -69,18 +70,15 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
   };
 
   const selectScenario = (scenario: (typeof GOVIN_DEMO_SCENARIOS)[number]) => {
-    setIntegration(scenario.integration as GovinIntegration);
+    setIntegration(scenario.integration);
     setBarcode(scenario.barcode);
     setSearchState('idle');
     setResult(null);
   };
 
   const handleCreateIncident = () => {
-    if (result) {
-      const context = toPriizContext(result);
-      sessionStorage.setItem('govin-priiz-demo-context', JSON.stringify(context));
-    }
-    onCreateIncident();
+    if (!result) return;
+    onCreateIncident(toPriizContext(result));
   };
 
   const resetSearch = () => {
@@ -124,7 +122,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
           <button
             disabled={!integration || !barcode.trim() || searchState === 'loading'}
             onClick={() => void runSearch()}
-            className="px-4 py-2 rounded-lg bg-[#0099a8] disabled:bg-slate-300 hover:bg-[#007f89] text-white text-sm font-bold inline-flex items-center justify-center gap-2"
+            className="px-4 py-2 rounded-lg bg-[#0099a8] disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-[#007f89] disabled:hover:bg-slate-300 text-white text-sm font-bold inline-flex items-center justify-center gap-2"
           >
             {searchState === 'loading' ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             {searchState === 'loading' ? 'Ищем...' : 'Найти'}
