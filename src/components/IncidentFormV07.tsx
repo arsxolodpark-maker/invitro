@@ -1,20 +1,38 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Info, Send } from 'lucide-react';
 import { Incident, UserRole } from '../types';
+import { GovinPriizContext } from '../modules/govin/types';
 
 interface Props {
   currentRole: UserRole;
+  govinContext?: GovinPriizContext | null;
   onBack: () => void;
   onSubmit: (incidentData: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>) => void;
 }
 
-export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit }) => {
-  const [client, setClient] = useState('ООО «Демо-клиент»');
-  const [clientCode, setClientCode] = useState('CLI-DEMO-01');
-  const [lpu, setLpu] = useState('Подразделение клиента · DEMO');
-  const [inz, setInz] = useState('998877665');
-  const [vendor, setVendor] = useState('Вендор МИС · DEMO');
-  const [description, setDescription] = useState('DEMO: результат исследования не отображается в системе клиента.');
+function buildGovinDescription(context: GovinPriizContext): string {
+  const diagnostic = context.checkinError || context.deliveryErrors.join('; ') || 'Диагностическая ошибка не зафиксирована';
+  const delivered = context.deliveredTests.length ? context.deliveredTests.join(', ') : 'нет данных';
+  const assigned = context.assignedTests.length ? context.assignedTests.join(', ') : 'нет данных';
+  return [
+    `DEMO: обращение создано из GOVIN.`,
+    `Интеграция: ${context.integration}.`,
+    `Штрихкод: ${context.barcode}.`,
+    `Внешний ID: ${context.externalDirectionId}.`,
+    `Исходный статус: ${context.sourceStatus}.`,
+    `Назначенные тесты: ${assigned}.`,
+    `Доставленные тесты: ${delivered}.`,
+    `Диагностика: ${diagnostic}.`,
+  ].join(' ');
+}
+
+export const IncidentFormV07: React.FC<Props> = ({ currentRole, govinContext, onBack, onSubmit }) => {
+  const [client, setClient] = useState(govinContext?.client ?? 'ООО «Демо-клиент»');
+  const [clientCode, setClientCode] = useState(govinContext ? '' : 'CLI-DEMO-01');
+  const [lpu, setLpu] = useState(govinContext ? '' : 'Подразделение клиента · DEMO');
+  const [inz, setInz] = useState(govinContext?.inz.length ? govinContext.inz.join(', ') : govinContext ? '' : '998877665');
+  const [vendor, setVendor] = useState(govinContext?.integration ?? 'Вендор МИС · DEMO');
+  const [description, setDescription] = useState(govinContext ? buildGovinDescription(govinContext) : 'DEMO: результат исследования не отображается в системе клиента.');
   const [vendorContacted, setVendorContacted] = useState(false);
   const [vendorAnswer, setVendorAnswer] = useState('');
 
@@ -23,7 +41,7 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit
     if (!client.trim() || !clientCode.trim() || !inz.trim() || !description.trim()) return;
     onSubmit({
       incidentType: 'INC-02',
-      source: 'ПРИИЗ Portal',
+      source: govinContext ? 'GOVIN → ПРИИЗ DEMO' : 'ПРИИЗ Portal',
       createdBy: currentRole === 'Инициатор' ? 'Внешний инициатор · DEMO' : `Пользователь (${currentRole})`,
       authorRole: currentRole,
       priority: 'Высокий',
@@ -50,21 +68,27 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit
 
   return (
     <div className="max-w-3xl mx-auto py-4 pb-16 space-y-5">
-      <button onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />К выбору типа</button>
+      <button onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />{govinContext ? 'К GOVIN' : 'К выбору типа'}</button>
 
       <div className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs">
         <div className="flex items-center gap-2"><span className="text-xs font-bold px-2.5 py-1 rounded bg-[#e9f8f8] text-[#007f89]">INC-02</span><h1 className="text-xl font-extrabold text-[#17383d]">Не получен результат</h1></div>
         <p className="text-sm text-slate-500 mt-2">Оставляем один подтвержденный DEMO-сценарий до получения фактической статистики типов обращений.</p>
       </div>
 
+      {govinContext && (
+        <div className="rounded-xl border border-[#8bd2d6] bg-[#f3fbfb] p-4 text-sm text-slate-700">
+          <strong className="text-[#007f89]">Контекст GOVIN передан.</strong> Клиент, интеграция, ИНЗ (если уже присвоен) и диагностическое описание заполнены автоматически. Поля, которых GOVIN не знает, нужно дополнить вручную. Это только DESIGN-модель публичного прототипа, не промышленный API.
+        </div>
+      )}
+
       <form onSubmit={submit} className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field label="Клиент *" value={client} setValue={setClient} />
-          <Field label="Код клиента *" value={clientCode} setValue={setClientCode} />
-          <Field label="ЛПУ / подразделение" value={lpu} setValue={setLpu} />
-          <Field label="ИНЗ / номер заявки *" value={inz} setValue={setInz} />
+          <Field label="Код клиента *" value={clientCode} setValue={setClientCode} placeholder={govinContext ? 'Дополните вручную' : undefined} />
+          <Field label="ЛПУ / подразделение" value={lpu} setValue={setLpu} placeholder={govinContext ? 'Если требуется' : undefined} />
+          <Field label="ИНЗ / номер заявки *" value={inz} setValue={setInz} placeholder={govinContext && !govinContext.inz.length ? 'В GOVIN ИНЗ ещё не присвоен' : undefined} />
           <div className="md:col-span-2"><Field label="Вендор / интеграция" value={vendor} setValue={setVendor} /></div>
-          <div className="md:col-span-2"><label className="text-xs font-bold text-slate-700">Описание проблемы *</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full min-h-24 px-3 py-2.5 border border-[#d8e7e7] rounded-xl text-sm" /></div>
+          <div className="md:col-span-2"><label className="text-xs font-bold text-slate-700">Описание проблемы *</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full min-h-28 px-3 py-2.5 border border-[#d8e7e7] rounded-xl text-sm" /></div>
         </div>
 
         <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={vendorContacted} onChange={(e) => setVendorContacted(e.target.checked)} />Уже обращались к вендору</label>
@@ -81,4 +105,4 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit
   );
 };
 
-const Field: React.FC<{ label: string; value: string; setValue: (v: string) => void }> = ({ label, value, setValue }) => <label className="block"><span className="text-xs font-bold text-slate-700">{label}</span><input value={value} onChange={(e) => setValue(e.target.value)} className="mt-1 w-full px-3 py-2.5 border border-[#d8e7e7] rounded-xl text-sm" /></label>;
+const Field: React.FC<{ label: string; value: string; setValue: (v: string) => void; placeholder?: string }> = ({ label, value, setValue, placeholder }) => <label className="block"><span className="text-xs font-bold text-slate-700">{label}</span><input value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} className="mt-1 w-full px-3 py-2.5 border border-[#d8e7e7] rounded-xl text-sm" /></label>;
