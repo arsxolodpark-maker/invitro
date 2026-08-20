@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GOVIN-303 · DEMO v0.4</title>
+  <style>
+    :root{font-family:Inter,Arial,sans-serif;color:#17383d;background:#f4f7f8}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1100px;margin:auto;padding:24px}.card{background:#fff;border:1px solid #dfeaea;border-radius:18px;padding:22px;margin-bottom:18px}.eyebrow{font-size:12px;font-weight:800;color:#008c98;letter-spacing:.08em}.muted{color:#64748b;font-size:14px}.grid{display:grid;grid-template-columns:220px 1fr auto;gap:12px;align-items:end}@media(max-width:760px){.grid{grid-template-columns:1fr}}label{font-size:12px;font-weight:800;color:#475569}select,input,textarea{width:100%;margin-top:6px;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;font-size:14px}button{border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer}.primary{background:#0099a8;color:#fff}.secondary{background:#fff;color:#007f89;border:1px solid #8bd2d6}.chip{padding:7px 10px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:12px;margin:4px}.chips{margin-top:14px}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f5f9;font-size:12px;font-weight:800;margin-left:6px}.err{background:#fff1f2;color:#b91c1c;border:1px solid #fecdd3}.ok{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:760px){.cols{grid-template-columns:1fr}}.box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px}.small{font-size:12px;color:#64748b}.strong{font-weight:800}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.banner{padding:15px;border-radius:12px;margin:12px 0}.hidden{display:none}.priiz{border-top:1px solid #e2e8f0;margin-top:18px;padding-top:18px}.demo-note{font-size:11px;color:#94a3b8}.title{font-size:28px;margin:6px 0}.statusline{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.divider{height:1px;background:#e2e8f0;margin:16px 0}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="eyebrow">GOVIN-303 · DEMO v0.4</div>
+    <h1 class="title">Проверка направления</h1>
+    <div class="muted">Кликабельный безопасный preview. Только вымышленные данные, без реальных API, ПДн и медицинских данных.</div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div><label>Интеграция<select id="integration"><option value="">Выберите интеграцию</option><option>Нетрика</option><option>Адыгея</option><option>Брегис</option></select></label></div>
+      <div><label>Штрихкод направления<input id="barcode" placeholder="Например, 1236514265"></label></div>
+      <button class="primary" id="search">Найти</button>
+    </div>
+    <div class="chips">
+      <button class="chip" data-s="S1">S1 · Успешная доставка</button>
+      <button class="chip" data-s="S2">S2 · Только получено</button>
+      <button class="chip" data-s="S3">S3 · Ошибка чекина</button>
+      <button class="chip" data-s="S4">S4 · Ошибка доставки</button>
+      <button class="chip" data-s="S5">S5 · Не найдено</button>
+    </div>
+  </div>
+
+  <div id="notfound" class="card hidden">
+    <div class="banner warn"><div class="strong">Направление не найдено</div><div class="small">Проверьте штрихкод и выбранную интеграцию. Автоматический поиск по всем интеграциям в MVP не используется.</div></div>
+    <div class="actions" id="alt"></div>
+  </div>
+
+  <div id="result" class="card hidden">
+    <div class="statusline"><div><div class="small" id="sourceLine"></div><div class="strong" id="externalId"></div></div><div><span class="pill" id="stage"></span><span class="pill err hidden" id="problem"></span></div></div>
+    <div class="divider"></div>
+    <div class="cols">
+      <div class="box"><div class="small">Клиент</div><div class="strong" id="client"></div><div class="small" style="margin-top:10px">Дата направления</div><div class="strong" id="date"></div></div>
+      <div class="box"><div class="small">ИНЗ</div><div class="strong" id="inz"></div><div class="small" style="margin-top:10px">Штрихкод</div><div class="strong" id="bc"></div></div>
+      <div class="box"><div class="small">Исходный статус</div><div class="strong" id="sourceStatus"></div><div class="small" style="margin-top:10px">Последняя доставка</div><div class="strong" id="last"></div></div>
+    </div>
+    <div class="cols" style="margin-top:12px">
+      <div class="box"><div class="small">Назначенные тесты</div><div class="strong" id="assigned"></div></div>
+      <div class="box"><div class="small">Доставленные тесты</div><div class="strong" id="delivered"></div></div>
+      <div class="box" id="diagbox"><div class="small">Диагностика</div><div class="strong" id="diag"></div></div>
+    </div>
+    <div class="priiz"><div class="strong">Что делать дальше</div><div class="muted" id="next"></div><div class="actions"><button class="secondary" id="toPriiz">Создать обращение в ПРИИЗ</button></div></div>
+  </div>
+
+  <div id="priiz" class="card hidden">
+    <div class="eyebrow">ПРИИЗ · DEMO</div>
+    <h2>Не получен результат</h2>
+    <div class="banner ok">Контекст из GOVIN предзаполнен только там, где данные реально были доступны.</div>
+    <div class="cols">
+      <label>Клиент<input id="pClient"></label>
+      <label>ИНЗ / номер заявки<input id="pInz" placeholder="Введите вручную, если GOVIN не знает ИНЗ"></label>
+      <label>Вендор / интеграция<input id="pVendor"></label>
+    </div>
+    <label style="display:block;margin-top:12px">Описание проблемы<textarea id="pDesc" rows="5"></textarea></label>
+    <div class="actions"><button class="primary" onclick="alert('DEMO: обращение не отправляется в реальные системы')">Создать обращение · DEMO</button><button class="secondary" id="back">Назад в GOVIN</button></div>
+  </div>
+
+  <div class="demo-note">Preview синхронизирован с публичной логикой GOVIN v0.4: явный выбор интеграции, S1-S5, раздельные sourceStatus / uiStage / diagnosticProblem и демонстрационная передача контекста в ПРИИЗ.</div>
+</div>
+<script>
+const data={
+S1:{integration:'Нетрика',barcode:'1236514265',externalId:'EXT-DEMO-001',client:'Демо-клиент 1',date:'25.05.2026 20:24',sourceStatus:'Доставка',stage:'Доставка',problem:'',inz:'942476082',assigned:'16GLU, 70EIA, 68HIV',delivered:'16GLU, 70EIA, 68HIV',last:'28.05.2026 01:23',diag:'Ошибки не обнаружены',next:'По данным GOVIN доставка завершена, диагностические ошибки не обнаружены.'},
+S2:{integration:'Адыгея',barcode:'2236514265',externalId:'EXT-DEMO-002',client:'Демо-клиент 2',date:'26.05.2026 12:10',sourceStatus:'Направление получено',stage:'Направление получено',problem:'',inz:'',assigned:'Нет данных',delivered:'Нет данных',last:'Нет данных',diag:'Ошибки не обнаружены',next:'Направление получено внешним контуром. Если ситуация уже требует разбора, передайте контекст в ПРИИЗ; иначе направление можно проверить позднее.'},
+S3:{integration:'Брегис',barcode:'3236514265',externalId:'EXT-DEMO-003',client:'Демо-клиент 3',date:'26.05.2026 13:20',sourceStatus:'Ошибка чекина',stage:'Чекин',problem:'Ошибка чекина',inz:'',assigned:'Нет данных',delivered:'Нет данных',last:'Нет данных',diag:'Демонстрационная ошибка чекина',next:'Проверьте диагностическую ошибку и при необходимости передайте контекст в ПРИИЗ.'},
+S4:{integration:'Нетрика',barcode:'4236514265',externalId:'EXT-DEMO-004',client:'Демо-клиент 4',date:'27.05.2026 14:30',sourceStatus:'Доставка',stage:'Доставка',problem:'Ошибка доставки',inz:'942476083, 942476084',assigned:'16GLU, 70EIA, 68HIV',delivered:'16GLU, 70EIA',last:'28.05.2026 01:23',diag:'Демонстрационная ошибка доставки',next:'Проверьте доставленные тесты и ошибку доставки, затем передайте контекст в ПРИИЗ.'}
+};
+let current=null;const q=id=>document.getElementById(id);const integrations=['Нетрика','Адыгея','Брегис'];
+function selectScenario(id){if(id==='S5'){q('integration').value='Нетрика';q('barcode').value='9999999999';search();return;} const d=data[id];q('integration').value=d.integration;q('barcode').value=d.barcode;search();}
+function search(){q('priiz').classList.add('hidden');const i=q('integration').value,b=q('barcode').value.trim();if(!i||!b)return;current=Object.values(data).find(x=>x.integration===i&&x.barcode===b)||null;if(!current){q('result').classList.add('hidden');q('notfound').classList.remove('hidden');q('alt').innerHTML=integrations.filter(x=>x!==i).map(x=>`<button class="secondary" onclick="q('integration').value='${x}';search()">Искать в ${x}</button>`).join('');return;}q('notfound').classList.add('hidden');q('result').classList.remove('hidden');q('sourceLine').textContent=current.integration+' · внешнее направление';q('externalId').textContent=current.externalId;q('stage').textContent='Этап: '+current.stage;q('problem').textContent=current.problem;q('problem').classList.toggle('hidden',!current.problem);q('client').textContent=current.client;q('date').textContent=current.date;q('inz').textContent=current.inz||'Не присвоен';q('bc').textContent=current.barcode;q('sourceStatus').textContent=current.sourceStatus;q('last').textContent=current.last;q('assigned').textContent=current.assigned;q('delivered').textContent=current.delivered;q('diag').textContent=current.diag;q('diagbox').style.background=current.problem?'#fff1f2':'#ecfdf5';q('next').textContent=current.next;}
+q('search').onclick=search;document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>selectScenario(b.dataset.s));q('toPriiz').onclick=()=>{if(!current)return;q('result').classList.add('hidden');q('priiz').classList.remove('hidden');q('pClient').value=current.client;q('pInz').value=current.inz.split(',')[0]||'';q('pVendor').value=current.integration;q('pDesc').value=`GOVIN DEMO: ${current.problem||current.stage}. Исходный статус: ${current.sourceStatus}. Штрихкод: ${current.barcode}. Внешнее направление: ${current.externalId}. Диагностика: ${current.diag}.`;};q('back').onclick=()=>{q('priiz').classList.add('hidden');q('result').classList.remove('hidden');};
+</script>
+</body>
+</html>
