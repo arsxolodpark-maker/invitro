@@ -1,0 +1,16 @@
+import { GovinDirection } from './types';
+
+export const GOVIN_DEMO_DIRECTIONS: GovinDirection[] = [
+  { id: 'demo-success', integration: 'Нетрика', serviceKey: 'netrika', externalId: 'EXT-DEMO-001', externalOrderDate: '2026-05-25T17:24:46Z', client: 'Демо-клиент 1', barcode: '1236514265', sourceStatus: 'Доставка', uiStage: 'DELIVERY', diagnosticProblem: null, inz: [942476082], assignedTests: ['16GLU', '70EIA', '68HIV'], deliveredTests: ['16GLU', '70EIA', '68HIV'], lastDeliveryDate: '2026-05-27T22:23:11Z' },
+  { id: 'demo-received', integration: 'Адыгея', serviceKey: 'adygea', externalId: 'EXT-DEMO-002', externalOrderDate: '2026-05-26T09:10:00Z', client: 'Демо-клиент 2', barcode: '2236514265', sourceStatus: 'Направление получено', uiStage: 'RECEIVED', diagnosticProblem: null, inz: [], assignedTests: [], deliveredTests: [], lastDeliveryDate: null },
+  { id: 'demo-checkin-error', integration: 'Брегис', serviceKey: 'bregis', externalId: 'EXT-DEMO-003', externalOrderDate: '2026-05-26T10:20:00Z', client: 'Демо-клиент 3', barcode: '3236514265', sourceStatus: 'Ошибка чекина', uiStage: 'CHECKIN', diagnosticProblem: 'CHECKIN_ERROR', inz: [], assignedTests: [], deliveredTests: [], checkinError: 'Демонстрационная ошибка чекина', lastDeliveryDate: null },
+  { id: 'demo-delivery-error', integration: 'Нетрика', serviceKey: 'netrika', externalId: 'EXT-DEMO-004', externalOrderDate: '2026-05-27T11:30:00Z', client: 'Демо-клиент 4', barcode: '4236514265', sourceStatus: 'Доставка', uiStage: 'DELIVERY', diagnosticProblem: 'DELIVERY_ERROR', inz: [942476083, 942476084], assignedTests: ['16GLU', '70EIA', '68HIV'], deliveredTests: ['16GLU', '70EIA'], deliveryErrors: ['Демонстрационная ошибка доставки'], lastDeliveryDate: '2026-05-27T22:23:11Z' },
+];
+
+export const GOVIN_DEMO_SCENARIOS = [
+  { id: 'S1', label: 'Успешная доставка', integration: 'Нетрика', barcode: '1236514265' },
+  { id: 'S2', label: 'Только получено', integration: 'Адыгея', barcode: '2236514265' },
+  { id: 'S3', label: 'Ошибка чекина', integration: 'Брегис', barcode: '3236514265' },
+  { id: 'S4', label: 'Ошибка доставки', integration: 'Нетрика', barcode: '4236514265' },
+  { id: 'S5', label: 'Не найдено', integration: 'Нетрика', barcode: '9999999999' },
+] as const;
