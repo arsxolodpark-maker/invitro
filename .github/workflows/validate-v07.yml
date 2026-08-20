@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/priiz-v0.7
+      - feature/priiz-v0.7-ux-pass
   pull_request:
     branches:
       - main
