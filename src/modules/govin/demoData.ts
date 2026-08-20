@@ -4,6 +4,7 @@ export const GOVIN_DEMO_DIRECTIONS: GovinDirection[] = [
   {
     id: 'demo-success',
     integration: 'Нетрика',
+    serviceKey: 'netrika',
     externalId: 'EXT-DEMO-001',
     externalOrderDate: '2026-05-25T17:24:46Z',
     client: 'Демо-клиент 1',
@@ -19,6 +20,7 @@ export const GOVIN_DEMO_DIRECTIONS: GovinDirection[] = [
   {
     id: 'demo-received',
     integration: 'Адыгея',
+    serviceKey: 'adygea',
     externalId: 'EXT-DEMO-002',
     externalOrderDate: '2026-05-26T09:10:00Z',
     client: 'Демо-клиент 2',
@@ -34,6 +36,7 @@ export const GOVIN_DEMO_DIRECTIONS: GovinDirection[] = [
   {
     id: 'demo-checkin-error',
     integration: 'Брегис',
+    serviceKey: 'bregis',
     externalId: 'EXT-DEMO-003',
     externalOrderDate: '2026-05-26T10:20:00Z',
     client: 'Демо-клиент 3',
@@ -50,6 +53,7 @@ export const GOVIN_DEMO_DIRECTIONS: GovinDirection[] = [
   {
     id: 'demo-delivery-error',
     integration: 'Нетрика',
+    serviceKey: 'netrika',
     externalId: 'EXT-DEMO-004',
     externalOrderDate: '2026-05-27T11:30:00Z',
     client: 'Демо-клиент 4',
@@ -64,3 +68,11 @@ export const GOVIN_DEMO_DIRECTIONS: GovinDirection[] = [
     lastDeliveryDate: '2026-05-27T22:23:11Z',
   },
 ];
+
+export const GOVIN_DEMO_SCENARIOS = [
+  { id: 'S1', label: 'Успешная доставка', integration: 'Нетрика', barcode: '1236514265' },
+  { id: 'S2', label: 'Только получено', integration: 'Адыгея', barcode: '2236514265' },
+  { id: 'S3', label: 'Ошибка чекина', integration: 'Брегис', barcode: '3236514265' },
+  { id: 'S4', label: 'Ошибка доставки', integration: 'Нетрика', barcode: '4236514265' },
+  { id: 'S5', label: 'Не найдено', integration: 'Нетрика', barcode: '9999999999' },
+] as const;
