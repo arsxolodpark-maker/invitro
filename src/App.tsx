@@ -33,7 +33,7 @@ export default function App() {
     setCurrentRole(newRole);
     setSelectedIncidentId(null);
     setConsoleInz(null);
-    setActiveView(newRole === 'Администратор' ? 'admin' : 'home');
+    setActiveView(newRole === 'Администратор' ? 'admin' : newRole === 'Project' ? 'analytics' : 'home');
   };
 
   const handleNavigate = (view: 'home' | 'direction-check' | 'initiators' | 'analytics' | 'knowledge' | 'admin') => {
@@ -66,7 +66,7 @@ export default function App() {
       resetDemoData();
       resetInitiators();
       refreshIncidents();
-      setActiveView(currentRole === 'Администратор' ? 'admin' : 'home');
+      setActiveView(currentRole === 'Администратор' ? 'admin' : currentRole === 'Project' ? 'analytics' : 'home');
       setSelectedIncidentId(null);
       window.location.reload();
     }
