@@ -3,62 +3,17 @@
  * Core TypeScript Data Models
  */
 
-// «Project» — дополнительный внутренний аналитический view прототипа.
-// «Support» оставлен только как технический legacy-alias в старых DEMO-данных.
 export type UserRole = 'Инициатор' | 'ДКП' | 'Инженер ГСТИ' | 'Администратор' | 'Project' | 'Support';
-
-// До получения фактической статистики обращений утвержден только DEMO-сценарий INC-02.
 export type IncidentType = 'INC-02' | 'OTHER';
-
-// Пользовательская статусная модель ПРИИЗ из аналитики v9.
-export type IncidentStatus =
-  | 'Новое'
-  | 'В работе'
-  | 'Отложено'
-  | 'Ожидает ответа'
-  | 'Ожидает согласования'
-  | 'Выполнено'
-  | 'Закрыт';
-
+export type IncidentStatus = 'Новое' | 'В работе' | 'Отложено' | 'Ожидает ответа' | 'Ожидает согласования' | 'Выполнено' | 'Закрыт';
 export type IntegrationType = 'типовая' | 'кастомная';
 export type ProblemScope = 'единичная' | 'несколько' | 'массовая' | 'неизвестно';
 export type WorkedBefore = 'да' | 'нет' | 'неизвестно';
 
-export interface DiagnosticStage {
-  id: string;
-  name: string;
-  status: 'ok' | 'error' | 'warning' | 'pending';
-  details?: string;
-  timestamp?: string;
-}
-
-export interface DiagnosticResult {
-  inzFound: boolean;
-  labExecutionPassed: boolean;
-  resultGenerated: boolean;
-  deliveryConfirmed: boolean;
-  stages: DiagnosticStage[];
-  recommendedAction?: string;
-  traceId?: string;
-  checkedAt?: string;
-}
-
-export interface IncidentComment {
-  id: string;
-  author: string;
-  role: UserRole;
-  content: string;
-  createdAt: string;
-  isInternal?: boolean;
-}
-
-export interface AttachmentMeta {
-  id: string;
-  fileName: string;
-  fileSize: string;
-  fileType: string;
-  uploadedAt: string;
-}
+export interface DiagnosticStage { id: string; name: string; status: 'ok' | 'error' | 'warning' | 'pending'; details?: string; timestamp?: string; }
+export interface DiagnosticResult { inzFound: boolean; labExecutionPassed: boolean; resultGenerated: boolean; deliveryConfirmed: boolean; stages: DiagnosticStage[]; recommendedAction?: string; traceId?: string; checkedAt?: string; }
+export interface IncidentComment { id: string; author: string; role: UserRole; content: string; createdAt: string; isInternal?: boolean; }
+export interface AttachmentMeta { id: string; fileName: string; fileSize: string; fileType: string; uploadedAt: string; }
 
 export interface Incident {
   id: string;
@@ -66,13 +21,13 @@ export interface Incident {
   source: string;
   createdAt: string;
   createdBy: string;
+  initiatorEmail?: string;
   authorRole: UserRole;
   status: IncidentStatus;
   priority: 'Низкий' | 'Средний' | 'Высокий' | 'Критический';
   responsibleTeam: string;
   assignee?: string;
   internalServiceDeskId?: string;
-
   client: string;
   clientCode: string;
   contract?: string;
@@ -80,24 +35,20 @@ export interface Incident {
   vendor: string;
   integrationType: IntegrationType;
   environment: 'Production' | 'Test';
-
   inz: string;
   eventDateTime: string;
   scope: ProblemScope;
   workedBefore: WorkedBefore;
   description: string;
-
   vendorContacted: boolean;
   vendorAnswer?: string;
   attachments: AttachmentMeta[];
-
   diagnosticResult?: DiagnosticResult;
   comments: IncidentComment[];
-
   fullDataOnFirstSubmit: boolean;
   clarificationCount: number;
   slaStatus: 'В норме (демо)' | 'Превышен (демо)' | 'Риск нарушения (демо)';
-
+  resultConfirmed?: boolean;
   rootCause?: string;
   resolution?: string;
   resolvedAt?: string;
@@ -112,12 +63,5 @@ export interface IncidentMetrics {
   mttrMinutes: number;
   repeatIncidentRate: number;
   nonPriizIncidentShare: number;
-  typeBreakdown: {
-    type: string;
-    label: string;
-    count: number;
-    mttrMinutes: number;
-    repeatRate: number;
-    responsibleTeam: string;
-  }[];
+  typeBreakdown: { type: string; label: string; count: number; mttrMinutes: number; repeatRate: number; responsibleTeam: string; }[];
 }
