@@ -6,13 +6,8 @@ import { Incident, IncidentComment, IncidentMetrics, UserRole, IncidentStatus } 
 import { incidentRepository } from '../repositories/incidentRepository';
 import { serviceDeskAdapter } from './serviceDesk';
 
-export function getIncidents(): Incident[] {
-  return incidentRepository.getAll();
-}
-
-export function getIncidentById(id: string): Incident | undefined {
-  return incidentRepository.getById(id);
-}
+export function getIncidents(): Incident[] { return incidentRepository.getAll(); }
+export function getIncidentById(id: string): Incident | undefined { return incidentRepository.getById(id); }
 
 export function createIncident(data: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>): Incident {
   const newId = incidentRepository.generateNextId();
@@ -21,26 +16,13 @@ export function createIncident(data: Omit<Incident, 'id' | 'createdAt' | 'commen
     id: newId,
     createdAt: new Date().toISOString(),
     status: 'Новое',
-    comments: [{
-      id: `c-${Date.now()}`,
-      author: data.createdBy,
-      role: data.authorRole,
-      content: `Обращение создано в ПРИИЗ. Тип: ${data.incidentType}, ИНЗ: ${data.inz}.`,
-      createdAt: new Date().toISOString(),
-    }],
+    resultConfirmed: false,
+    comments: [{ id: `c-${Date.now()}`, author: data.createdBy, role: data.authorRole, content: `Обращение создано в ПРИИЗ. Тип: ${data.incidentType}, ИНЗ: ${data.inz}.`, createdAt: new Date().toISOString() }],
   };
 
-  // DEMO: отражает подтвержденный целевой обмен ПРИИЗ -> 1C:ITILIUM.
   serviceDeskAdapter.syncWithServiceDesk(newIncident).then((res) => {
     newIncident.internalServiceDeskId = res.internalTicketId;
-    newIncident.comments.push({
-      id: `c-${Date.now()}-itilium`,
-      author: 'ПРИИЗ',
-      role: 'Администратор',
-      content: `DEMO: обращение зарегистрировано в 1C:ITILIUM, номер ${res.internalTicketId}.`,
-      createdAt: res.syncedAt,
-      isInternal: true,
-    });
+    newIncident.comments.push({ id: `c-${Date.now()}-itilium`, author: 'ПРИИЗ', role: 'Администратор', content: `DEMO: обращение зарегистрировано в 1C:ITILIUM, номер ${res.internalTicketId}.`, createdAt: res.syncedAt, isInternal: true });
     incidentRepository.save(newIncident);
   });
 
@@ -50,7 +32,6 @@ export function createIncident(data: Omit<Incident, 'id' | 'createdAt' | 'commen
 export function addIncidentComment(incidentId: string, author: string, role: UserRole, content: string, isInternal?: boolean): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
-
   const newComment: IncidentComment = { id: `c-${Date.now()}`, author, role, content, createdAt: new Date().toISOString(), isInternal };
   if ((role === 'Инженер ГСТИ' || role === 'Support') && content.toLowerCase().includes('уточн')) {
     incident.clarificationCount = (incident.clarificationCount || 0) + 1;
@@ -65,47 +46,41 @@ export function addIncidentComment(incidentId: string, author: string, role: Use
 export function updateIncidentStatus(incidentId: string, status: IncidentStatus): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
+  if (incident.status === status) return incident;
   incident.status = status;
+  if (status !== 'Выполнено') incident.resultConfirmed = false;
+  incident.comments.push({
+    id: `c-${Date.now()}-status`,
+    author: '1C:ITILIUM → ПРИИЗ',
+    role: 'Инженер ГСТИ',
+    content: `Статус обращения изменен на «${status}».`,
+    createdAt: new Date().toISOString(),
+  });
   return incidentRepository.save(incident);
 }
 
 export function confirmResultReceipt(incidentId: string, authorName: string, role: UserRole): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
-
   incident.status = 'Выполнено';
-  incident.comments.push({
-    id: `c-${Date.now()}`,
-    author: authorName,
-    role,
-    content: 'Результат подтвержден пользователем. Обращение переведено в статус «Выполнено».',
-    createdAt: new Date().toISOString(),
-  });
+  incident.resultConfirmed = true;
+  incident.comments.push({ id: `c-${Date.now()}`, author: authorName, role, content: 'Получение результата подтверждено. Обращение готово к финальному закрытию инженером.', createdAt: new Date().toISOString() });
   return incidentRepository.save(incident);
 }
 
 export function closeIncident(incidentId: string, authorName: string, rootCause: string, resolution: string): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
-
   incident.status = 'Закрыт';
   incident.rootCause = rootCause || 'Причина TBD';
   incident.resolution = resolution || 'Решение зафиксировано инженером';
   incident.resolvedAt = new Date().toISOString();
   incident.reusableKnowledge = true;
-  incident.comments.push({
-    id: `c-${Date.now()}`,
-    author: authorName,
-    role: 'Инженер ГСТИ',
-    content: `Обращение закрыто. Причина: [${incident.rootCause}]. Решение: ${incident.resolution}`,
-    createdAt: new Date().toISOString(),
-  });
+  incident.comments.push({ id: `c-${Date.now()}`, author: authorName, role: 'Инженер ГСТИ', content: `Обращение закрыто. Причина: [${incident.rootCause}]. Решение: ${incident.resolution}`, createdAt: new Date().toISOString() });
   return incidentRepository.save(incident);
 }
 
-export function resetDemoData(): Incident[] {
-  return incidentRepository.resetToDefault();
-}
+export function resetDemoData(): Incident[] { return incidentRepository.resetToDefault(); }
 
 export function getProductMetrics(): IncidentMetrics {
   const allIncidents = incidentRepository.getAll();
@@ -114,16 +89,5 @@ export function getProductMetrics(): IncidentMetrics {
   const firstTimeCompletenessRate = total > 0 ? Math.round((fullDataCount / total) * 1000) / 10 : 0;
   const totalClarifications = allIncidents.reduce((acc, i) => acc + (i.clarificationCount || 0), 0);
   const avgClarificationCount = total > 0 ? Math.round((totalClarifications / total) * 10) / 10 : 0;
-
-  // Все численные значения ниже остаются DEMO до получения фактического baseline.
-  return {
-    firstTimeCompletenessRate,
-    avgClarificationCount,
-    avgTimeToFullDataMinutes: 12,
-    selfServiceRate: 38.2,
-    mttrMinutes: 42,
-    repeatIncidentRate: 4.1,
-    nonPriizIncidentShare: 18,
-    typeBreakdown: [{ type: 'INC-02', label: 'Не получен результат', count: total, mttrMinutes: 42, repeatRate: 4.1, responsibleTeam: 'Инженер ГСТИ' }],
-  };
+  return { firstTimeCompletenessRate, avgClarificationCount, avgTimeToFullDataMinutes: 12, selfServiceRate: 38.2, mttrMinutes: 42, repeatIncidentRate: 4.1, nonPriizIncidentShare: 18, typeBreakdown: [{ type: 'INC-02', label: 'Не получен результат', count: total, mttrMinutes: 42, repeatRate: 4.1, responsibleTeam: 'Инженер ГСТИ' }] };
 }
