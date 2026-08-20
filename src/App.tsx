@@ -5,6 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Incident, IncidentType, UserRole } from './types';
+import { GovinPriizContext } from './modules/govin/types';
 import { addIncidentComment, closeIncident, confirmResultReceipt, createIncident, getIncidentById, getIncidents, resetDemoData } from './services/incidents';
 import { Header, AppView } from './components/Header';
 import { MainDashboard } from './components/MainDashboard';
@@ -25,6 +26,7 @@ export default function App() {
   const [selectedType, setSelectedType] = useState<IncidentType | null>(null);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [consoleInz, setConsoleInz] = useState<string | null>(null);
+  const [govinContext, setGovinContext] = useState<GovinPriizContext | null>(null);
 
   useEffect(() => { setIncidents(getIncidents()); }, []);
   const refreshIncidents = () => setIncidents(getIncidents());
@@ -32,20 +34,28 @@ export default function App() {
   const handleRoleChange = (newRole: UserRole) => {
     setCurrentRole(newRole);
     setSelectedIncidentId(null);
+    setGovinContext(null);
     setActiveView(newRole === 'Администратор' ? 'admin' : 'home');
   };
 
   const handleNavigate = (view: 'home' | 'direction-check' | 'analytics' | 'knowledge' | 'admin') => {
     setActiveView(view);
     setSelectedIncidentId(null);
+    if (view !== 'direction-check') setGovinContext(null);
   };
 
-  const handleStartCreateIncident = () => { setActiveView('select-type'); setSelectedType(null); };
+  const handleStartCreateIncident = () => { setGovinContext(null); setActiveView('select-type'); setSelectedType(null); };
+  const handleStartCreateIncidentFromGovin = (context: GovinPriizContext) => {
+    setGovinContext(context);
+    setSelectedType('INC-02');
+    setActiveView('form');
+  };
   const handleSelectType = (type: IncidentType) => { setSelectedType(type); if (type === 'INC-02') setActiveView('form'); };
 
   const handleCreateSubmit = (data: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>) => {
     const created = createIncident(data);
     refreshIncidents();
+    setGovinContext(null);
     setSelectedIncidentId(created.id);
     setActiveView('detail');
   };
@@ -57,7 +67,7 @@ export default function App() {
 
   const handleResetDemoData = () => {
     if (window.confirm('Сбросить все изменения к первоначальным демо-данным?')) {
-      resetDemoData(); refreshIncidents(); setActiveView(currentRole === 'Администратор' ? 'admin' : 'home'); setSelectedIncidentId(null);
+      resetDemoData(); refreshIncidents(); setGovinContext(null); setActiveView(currentRole === 'Администратор' ? 'admin' : 'home'); setSelectedIncidentId(null);
     }
   };
 
@@ -73,9 +83,9 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {activeView === 'home' && isInitiator && <InitiatorPortalView incidents={incidents} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
         {activeView === 'home' && !isInitiator && !isAdmin && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
-        {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
+        {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncidentFromGovin} />}
         {activeView === 'select-type' && !isAdmin && <IncidentTypeSelect onSelectType={handleSelectType} onBack={() => setActiveView('home')} />}
-        {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} onBack={() => setActiveView('select-type')} onSubmit={handleCreateSubmit} />}
+        {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} govinContext={govinContext} onBack={() => govinContext ? setActiveView('direction-check') : setActiveView('select-type')} onSubmit={handleCreateSubmit} />}
         {activeView === 'detail' && selectedIncident && !isAdmin && <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} />}
         {activeView === 'analytics' && currentRole === 'Project' && <AnalyticsView />}
         {activeView === 'knowledge' && !isInitiator && !isAdmin && <KnowledgeBaseView />}
