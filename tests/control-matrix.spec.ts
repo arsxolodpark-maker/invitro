@@ -6,23 +6,32 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('проверены активные и будущие модули, валидация GOVIN и инженерная диагностика', async ({ page }) => {
+test('проверены активные и будущие модули, GOVIN v0.5 и инженерная диагностика', async ({ page }) => {
   for (const moduleName of ['ОМС / лимиты', 'Маркетплейс', 'Покрытие', 'Платформа']) {
     await expect(page.getByRole('button', { name: new RegExp(`^${moduleName}`) })).toBeDisabled();
   }
 
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
-  await page.getByLabel('Штрихкод направления').fill('');
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByRole('alert')).toHaveText('Введите штрихкод направления.');
+  await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
 
-  await page.getByLabel('Штрихкод направления').fill('1236514265');
   await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Ошибка доставки')).toBeVisible();
-  await page.getByLabel('Интеграция').selectOption('Брегис');
-  await expect(page.getByText('Ошибка доставки')).toHaveCount(0);
+  await expect(page.getByRole('alert')).toHaveText('Сначала выберите интеграцию.');
+
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
   await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Брегис · внешнее направление')).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveText('Введите номер направления или штрихкод из алерта / чат-бота.');
+
+  await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
+  await page.getByRole('button', { name: 'Найти', exact: true }).click();
+  await expect(page.getByText('DIR-DEMO-001')).toBeVisible();
+  await expect(page.getByText('Этап 1')).toBeVisible();
+  await expect(page.getByText('Этап 2')).toBeVisible();
+  await expect(page.getByText('Этап 3')).toBeVisible();
+  await expect(page.getByText('Сводка маппинга')).toBeVisible();
+
+  await page.getByRole('button', { name: /S3 · Ошибка чекина/ }).click();
+  await expect(page.getByText('Ошибка чекина / маппинг биоматериала')).toBeVisible();
+  await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Инженер ГСТИ', exact: true }).click();
   await page.getByText('PRIIZ-000245', { exact: true }).click();
