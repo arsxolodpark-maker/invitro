@@ -155,7 +155,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
       vendor: direction.integration,
       inz: direction.inz.join(', '),
       contextLabel: `${direction.integration} · ${direction.issueLabel || direction.sourceStatus} · ${direction.barcode}`,
-      description: `GOVIN v0.5 · ${direction.issueLabel || direction.sourceStatus}. Этап: ${direction.stages.find((stage) => stage.state === 'error')?.title || 'Проверка направления'}. Клиент: ${direction.client || 'нет данных'}. ЛПУ: ${direction.lpu || 'нет данных'}. ИНЗ: ${direction.inz.join(', ') || 'не присвоен'}. Интеграция: ${direction.integration}. ${direction.incidentDescription || ''} Рекомендованный маршрут: ${direction.recommendedRoute || 'уточнить по регламенту'}.`,
+      description: `GOVIN v0.5 · ${direction.issueLabel || direction.sourceStatus}. Идентификатор направления: ${direction.barcode}. Этап: ${direction.stages.find((stage) => stage.state === 'error')?.title || 'Проверка направления'}. Клиент: ${direction.client || 'нет данных'}. ЛПУ: ${direction.lpu || 'нет данных'}. ИНЗ: ${direction.inz.join(', ') || 'не присвоен'}. Интеграция: ${direction.integration}. ${direction.incidentDescription || ''} Рекомендованный маршрут: ${direction.recommendedRoute || 'уточнить по регламенту'}.`,
     });
   };
 
@@ -181,7 +181,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_auto] gap-3 items-end">
           <label><span className="text-xs font-bold text-slate-700 block mb-1">Интеграция</span><select value={integration} onChange={(e) => { setIntegration(e.target.value as Integration | ''); clearResult(); }} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">Выберите интеграцию</option>{integrations.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label><span className="text-xs font-bold text-slate-700 block mb-1">Номер направления / штрихкод</span><input value={barcode} onChange={(e) => { setBarcode(e.target.value); clearResult(); }} onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }} placeholder="Введите номер из алерта / чат-бота" className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /><span className="block mt-1 text-[11px] text-slate-500">Подсказка для ДКП: используйте идентификатор направления, который пришёл в алерте или чат-боте. Точный промышленный тип поиска требует сверки контракта.</span></label>
+          <label><span className="text-xs font-bold text-slate-700 block mb-1">Номер направления / штрихкод</span><input value={barcode} onChange={(e) => { setBarcode(e.target.value); clearResult(); }} onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }} placeholder="Введите номер из алерта / чат-бота" className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /><span className="block mt-1 text-[11px] text-slate-500">Введите идентификатор направления из алерта или чат-бота.</span></label>
           <button type="button" onClick={handleSearch} className="px-5 py-2.5 rounded-xl bg-[#0099a8] hover:bg-[#007f89] text-white text-sm font-bold inline-flex items-center justify-center gap-2"><Search className="w-4 h-4" /> Найти</button>
         </div>
         {validationMessage && <div role="alert" className="mt-3 text-xs font-semibold text-red-600">{validationMessage}</div>}
@@ -196,6 +196,17 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
 
       {result && (
         <>
+          <div className={`rounded-2xl border p-5 ${result.issueLabel ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}>
+            <div className="flex items-start gap-3">
+              {result.issueLabel ? <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 shrink-0"/> : <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0"/>}
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-slate-600">Итог проверки</div>
+                <h2 className="font-extrabold text-slate-900 mt-1">{result.issueLabel || 'Проблем не обнаружено'}</h2>
+                <p className="text-sm text-slate-700 mt-1">{result.stages.find((stage) => stage.state === 'error')?.action || 'Направление прошло доступные контрольные этапы. Дополнительных действий не требуется.'}</p>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
             <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><div className="text-xs text-slate-500">{result.integration} · внешнее направление</div><div className="font-mono font-bold text-slate-900 mt-1">{result.externalId}</div></div><div className="flex gap-2 flex-wrap"><span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">{result.sourceStatus}</span>{result.issueLabel && <span className="px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-bold">{result.issueLabel}</span>}</div></div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-5 text-sm"><div className="p-4 rounded-xl bg-slate-50 border border-slate-200"><span className="text-xs text-slate-500 block">Клиент / ЛПУ</span><strong>{result.client}</strong><span className="block text-xs mt-1">{result.lpu}</span></div><div className="p-4 rounded-xl bg-slate-50 border border-slate-200"><span className="text-xs text-slate-500 block">Создано</span><strong>{result.createdAt}</strong><span className="text-xs text-slate-500 block mt-2">ИНЗ</span><strong>{result.inz.join(', ') || 'Не присвоен'}</strong></div><div className="p-4 rounded-xl bg-slate-50 border border-slate-200"><span className="text-xs text-slate-500 block">Услуга</span><strong>{result.serviceName}</strong><span className="text-xs text-slate-500 block mt-2">Штрихкод</span><strong>{result.barcode}</strong></div><div className="p-4 rounded-xl bg-slate-50 border border-slate-200"><span className="text-xs text-slate-500 block">База данных</span><strong>{result.databaseState}</strong></div></div>
@@ -217,7 +228,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
         </>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] text-slate-500">Регламент v0.5 основан на валидации команды ДКП от 21.08.2026. В публичном DEMO используются только вымышленные данные. Автоматическая маршрутизация в реальные команды, повторная отправка результатов и реальные API не выполняются.</div>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] text-slate-500">Регламент v0.5 основан на валидации команды ДКП от 21.08.2026. В публичном DEMO используются только вымышленные данные. Тип промышленного поискового идентификатора и точные маршруты команд остаются TBD до сверки контрактов. Автоматическая маршрутизация в реальные команды, повторная отправка результатов и реальные API не выполняются.</div>
     </div>
   );
 };
