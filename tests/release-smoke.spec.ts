@@ -31,7 +31,7 @@ test('ДКП: GOVIN v0.5 - три этапа и перенос контекст�
   await expect(page.getByText('Создать инцидент в ПРИИЗ')).toHaveCount(0);
 
   await page.getByRole('button', { name: /S4 · Ошибка доставки/ }).click();
-  await expect(page.getByText('Ошибка доставки / нет маппинга теста')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
   await expect(page.getByText('NMU-T05')).toBeVisible();
   await expect(page.getByText(/ГСТИ \/ техническая поддержка/).first()).toBeVisible();
   await page.getByRole('button', { name: 'Создать инцидент в ПРИИЗ' }).click();
