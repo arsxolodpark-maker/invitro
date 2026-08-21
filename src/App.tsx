@@ -1,6 +1,6 @@
 /**
  * Main Application Component
- * INVITRO Unified DKP Portal Prototype v0.7 UX pass
+ * INVITRO Unified DKP Portal Prototype v0.7.1
  */
 
 import React, { useEffect, useState } from 'react';
@@ -41,8 +41,6 @@ export default function App() {
     setSelectedIncidentId(null);
   };
 
-  // Пока подтвержден один пользовательский сценарий INC-02, поэтому не заставляем пользователя
-  // проходить пустой шаг выбора категории. Каталог вернется, когда появится подтвержденная статистика типов.
   const handleStartCreateIncident = () => setActiveView('form');
 
   const handleCreateSubmit = (data: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>) => {
@@ -78,10 +76,10 @@ export default function App() {
   const isEngineer = currentRole === 'Инженер ГСТИ';
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col notranslate" translate="no">
       <Header currentRole={currentRole} onRoleChange={handleRoleChange} activeView={activeView} onNavigate={handleNavigate} onResetData={handleResetDemoData} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5">
         {activeView === 'home' && isInitiator && <InitiatorPortalView incidents={incidents} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
         {activeView === 'home' && !isInitiator && !isAdmin && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={handleStartCreateIncident} onSelectIncident={handleSelectIncident} />}
         {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
@@ -95,9 +93,9 @@ export default function App() {
 
       {consoleInz && isEngineer && <IntegrationConsoleModal inz={consoleInz} onClose={() => setConsoleInz(null)} />}
 
-      <footer className="bg-white border-t border-[#dfeaea] py-4 mt-auto">
+      <footer className="bg-white border-t border-[#dfeaea] py-3 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-          <div className="flex items-center space-x-2"><span className="font-bold text-[#17383d]">ПРИИЗ v0.7 UX</span><span>•</span><span>контрольный end-to-end сценарий</span></div>
+          <div className="flex items-center space-x-2"><span className="font-bold text-[#17383d]">ПРИИЗ v0.7.1</span><span>•</span><span>UX-прототип</span></div>
           <div className="text-slate-400 text-[11px]">Все данные вымышлены. Реальные API, медицинские данные и ПДн не используются.</div>
         </div>
       </footer>
