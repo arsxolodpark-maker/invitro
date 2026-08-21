@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Info, Send } from 'lucide-react';
 import { Incident, UserRole } from '../types';
-import { getLatestInitiator } from '../services/users';
+import { getInitiatorSession, getLatestInitiator } from '../services/users';
 
 interface Props {
   currentRole: UserRole;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit }) => {
-  const initiator = getLatestInitiator();
+  const initiator = getInitiatorSession() || getLatestInitiator();
   const isExternal = currentRole === 'Инициатор';
   const [client, setClient] = useState(isExternal ? initiator.organization : 'ООО «Демо-клиент»');
   const [clientCode, setClientCode] = useState(isExternal ? initiator.clientCode : 'CLI-DEMO-01');
@@ -39,7 +39,7 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit
       integrationType: 'типовая',
       environment: 'Production',
       inz,
-      eventDateTime: new Date().toISOString().slice(0,16),
+      eventDateTime: new Date().toISOString().slice(0, 16),
       scope: 'единичная',
       workedBefore: 'да',
       description,
@@ -55,12 +55,15 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit
   const common = 'mt-1 w-full px-3 py-2.5 border border-[#d8e7e7] rounded-xl text-sm';
 
   return (
-    <div className="max-w-3xl mx-auto py-4 pb-16 space-y-5">
-      <button onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />К выбору типа</button>
-      <div className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs"><div className="flex items-center gap-2"><span className="text-xs font-bold px-2.5 py-1 rounded bg-[#e9f8f8] text-[#007f89]">INC-02</span><h1 className="text-xl font-extrabold text-[#17383d]">Не получен результат</h1></div><p className="text-sm text-slate-500 mt-2">Один подтвержденный сценарий до получения статистики по типам обращений.</p></div>
+    <div className="max-w-3xl mx-auto py-4 pb-16 space-y-5 notranslate" translate="no">
+      <button onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />Назад к обращениям</button>
+      <div className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs">
+        <div className="flex items-center gap-2 flex-wrap"><span className="text-xs font-bold px-2.5 py-1 rounded bg-[#e9f8f8] text-[#007f89]">INC-02</span><h1 className="text-xl font-extrabold text-[#17383d]">Не получен результат</h1></div>
+        <p className="text-sm text-slate-500 mt-2">Заполните данные, которые нужны для начала обработки обращения.</p>
+      </div>
 
       <form onSubmit={submit} className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs space-y-5">
-        {isExternal && <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600"><strong>Ваш профиль:</strong> {initiator.email} · {initiator.organization}. Организация и код клиента подставлены из учетной записи, чтобы не вводить их повторно.</div>}
+        {isExternal && <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600"><strong>Профиль:</strong> {initiator.email} · {initiator.organization}. Организация и код клиента уже заполнены.</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label><span className="text-xs font-bold text-slate-700">Клиент *</span><input value={client} readOnly={isExternal} onChange={(e) => setClient(e.target.value)} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
           <label><span className="text-xs font-bold text-slate-700">Код клиента *</span><input value={clientCode} readOnly={isExternal} onChange={(e) => setClientCode(e.target.value)} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
@@ -71,11 +74,10 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, onBack, onSubmit
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={vendorContacted} onChange={(e) => setVendorContacted(e.target.checked)} />Уже обращались к вендору</label>
         {vendorContacted && <textarea value={vendorAnswer} onChange={(e) => setVendorAnswer(e.target.value)} placeholder="Кратко укажите ответ вендора" className={`${common} min-h-20`} />}
-        <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600 flex gap-2"><Info className="w-4 h-4 text-[#0099a8] shrink-0" /><span>После создания обращение регистрируется в 1C:ITILIUM. ПРИИЗ показывает пользователю нормализованный статус из модели v9.</span></div>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800">Express: событие создания обращения формирует уведомление в настроенный чат. В DEMO реального API нет.</div>
+        <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600 flex gap-2"><Info className="w-4 h-4 text-[#0099a8] shrink-0" /><span>После создания обращение будет связано с 1C:ITILIUM, а его статус появится в ПРИИЗ.</span></div>
         <div className="flex justify-end"><button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button></div>
       </form>
-      <div className="flex items-center gap-2 text-xs text-emerald-700"><CheckCircle2 className="w-4 h-4" />Рабочий инженерный контур: Инженер ГСТИ / 1C:ITILIUM.</div>
+      {!isExternal && <div className="flex items-center gap-2 text-xs text-emerald-700"><CheckCircle2 className="w-4 h-4" />Инженерная обработка выполняется в контуре 1C:ITILIUM.</div>}
     </div>
   );
 };
