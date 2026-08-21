@@ -28,7 +28,7 @@ test('ДКП: навигация, поиск направления и пере�
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
   await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476082');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
-  await expect(page.getByLabel('Описание проблемы *')).toContainText('1236514265');
+  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/1236514265/);
 
   await page.getByRole('button', { name: 'Назад к обращениям' }).click();
   await expect(page.getByRole('heading', { name: 'Обращения', exact: true })).toBeVisible();
@@ -101,7 +101,7 @@ test('ДКП: поиск и фильтр обращений имеют поня�
 test('Project и база знаний: аналитика открывается, поиск работает', async ({ page }) => {
   await switchRole(page, 'Project');
   await expect(page.getByRole('heading', { name: 'Аналитика ПРИИЗ' })).toBeVisible();
-  await expect(page.getByText('DEMO DATA')).toBeVisible();
+  await expect(page.getByText('DEMO DATA').first()).toBeVisible();
 
   await page.getByRole('button', { name: 'База знаний', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'База знаний' })).toBeVisible();
