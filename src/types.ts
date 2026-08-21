@@ -1,19 +1,61 @@
 /**
- * ПРИИЗ INVITRO UX Prototype v0.7
+ * ПРИИЗ INVITRO UX Prototype v0.7.2
  * Core TypeScript Data Models
  */
 
-export type UserRole = 'Инициатор' | 'ДКП' | 'Инженер ГСТИ' | 'Администратор' | 'Project' | 'Support';
+export type UserRole = 'Инициатор' | 'ДКП' | 'Инженер ГСТИ' | 'Администратор' | 'Project';
 export type IncidentType = 'INC-02' | 'OTHER';
 export type IncidentStatus = 'Новое' | 'В работе' | 'Отложено' | 'Ожидает ответа' | 'Ожидает согласования' | 'Выполнено' | 'Закрыт';
 export type IntegrationType = 'типовая' | 'кастомная';
 export type ProblemScope = 'единичная' | 'несколько' | 'массовая' | 'неизвестно';
 export type WorkedBefore = 'да' | 'нет' | 'неизвестно';
 
-export interface DiagnosticStage { id: string; name: string; status: 'ok' | 'error' | 'warning' | 'pending'; details?: string; timestamp?: string; }
-export interface DiagnosticResult { inzFound: boolean; labExecutionPassed: boolean; resultGenerated: boolean; deliveryConfirmed: boolean; stages: DiagnosticStage[]; recommendedAction?: string; traceId?: string; checkedAt?: string; }
-export interface IncidentComment { id: string; author: string; role: UserRole; content: string; createdAt: string; isInternal?: boolean; }
-export interface AttachmentMeta { id: string; fileName: string; fileSize: string; fileType: string; uploadedAt: string; }
+export interface IncidentPrefill {
+  source: 'GOVIN-303';
+  client?: string;
+  clientCode?: string;
+  lpu?: string;
+  vendor?: string;
+  inz?: string;
+  description?: string;
+  contextLabel?: string;
+}
+
+export interface DiagnosticStage {
+  id: string;
+  name: string;
+  status: 'ok' | 'error' | 'warning' | 'pending';
+  details?: string;
+  timestamp?: string;
+}
+
+export interface DiagnosticResult {
+  inzFound: boolean;
+  labExecutionPassed: boolean;
+  resultGenerated: boolean;
+  deliveryConfirmed: boolean;
+  stages: DiagnosticStage[];
+  recommendedAction?: string;
+  traceId?: string;
+  checkedAt?: string;
+}
+
+export interface IncidentComment {
+  id: string;
+  author: string;
+  role: UserRole;
+  content: string;
+  createdAt: string;
+  isInternal?: boolean;
+}
+
+export interface AttachmentMeta {
+  id: string;
+  fileName: string;
+  fileSize: string;
+  fileType: string;
+  uploadedAt: string;
+}
 
 export interface Incident {
   id: string;
@@ -63,5 +105,12 @@ export interface IncidentMetrics {
   mttrMinutes: number;
   repeatIncidentRate: number;
   nonPriizIncidentShare: number;
-  typeBreakdown: { type: string; label: string; count: number; mttrMinutes: number; repeatRate: number; responsibleTeam: string; }[];
+  typeBreakdown: {
+    type: string;
+    label: string;
+    count: number;
+    mttrMinutes: number;
+    repeatRate: number;
+    responsibleTeam: string;
+  }[];
 }

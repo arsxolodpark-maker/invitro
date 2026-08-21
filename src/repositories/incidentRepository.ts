@@ -40,16 +40,47 @@ export const INITIAL_MOCK_INCIDENTS: Incident[] = [
   },
 ];
 
+function cloneIncidents(items: Incident[]): Incident[] {
+  // Services intentionally mutate repository entities before save. A deep clone prevents
+  // those mutations from corrupting INITIAL_MOCK_INCIDENTS and makes Reset deterministic.
+  return JSON.parse(JSON.stringify(items)) as Incident[];
+}
+
 export class IncidentRepository {
   private incidents: Incident[];
   constructor() { this.incidents = this.loadFromStorage(); }
-  private loadFromStorage(): Incident[] { try { const stored = localStorage.getItem(STORAGE_KEY); if (stored) return JSON.parse(stored); } catch (e) { console.warn('Failed to parse localStorage incidents:', e); } return [...INITIAL_MOCK_INCIDENTS]; }
-  private saveToStorage(): void { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.incidents)); } catch (e) { console.warn('Failed to save to localStorage:', e); } }
-  public resetToDefault(): Incident[] { this.incidents = [...INITIAL_MOCK_INCIDENTS]; this.saveToStorage(); return this.getAll(); }
+  private loadFromStorage(): Incident[] {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.warn('Failed to parse localStorage incidents:', e);
+    }
+    return cloneIncidents(INITIAL_MOCK_INCIDENTS);
+  }
+  private saveToStorage(): void {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.incidents)); }
+    catch (e) { console.warn('Failed to save to localStorage:', e); }
+  }
+  public resetToDefault(): Incident[] {
+    this.incidents = cloneIncidents(INITIAL_MOCK_INCIDENTS);
+    this.saveToStorage();
+    return this.getAll();
+  }
   public getAll(): Incident[] { return [...this.incidents].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); }
   public getById(id: string): Incident | undefined { return this.incidents.find((inc) => inc.id === id); }
-  public save(incident: Incident): Incident { const index = this.incidents.findIndex((inc) => inc.id === incident.id); if (index >= 0) this.incidents[index] = { ...incident }; else this.incidents.unshift(incident); this.saveToStorage(); return incident; }
-  public generateNextId(): string { const numbers = this.incidents.map((i) => { const num = parseInt(i.id.replace('PRIIZ-', ''), 10); return isNaN(num) ? 0 : num; }); const maxNum = numbers.length > 0 ? Math.max(...numbers) : 245; return `PRIIZ-${(maxNum + 1).toString().padStart(6, '0')}`; }
+  public save(incident: Incident): Incident {
+    const index = this.incidents.findIndex((inc) => inc.id === incident.id);
+    if (index >= 0) this.incidents[index] = { ...incident };
+    else this.incidents.unshift(incident);
+    this.saveToStorage();
+    return incident;
+  }
+  public generateNextId(): string {
+    const numbers = this.incidents.map((i) => { const num = parseInt(i.id.replace('PRIIZ-', ''), 10); return isNaN(num) ? 0 : num; });
+    const maxNum = numbers.length > 0 ? Math.max(...numbers) : 245;
+    return `PRIIZ-${(maxNum + 1).toString().padStart(6, '0')}`;
+  }
 }
 
 export const incidentRepository = new IncidentRepository();

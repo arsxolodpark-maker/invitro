@@ -1,5 +1,6 @@
 /**
  * Incident Management Service
+ * DEMO orchestration for PРИИЗ v0.7.2.
  */
 
 import { Incident, IncidentComment, IncidentMetrics, UserRole, IncidentStatus } from '../types';
@@ -11,38 +12,73 @@ export function getIncidentById(id: string): Incident | undefined { return incid
 
 export function createIncident(data: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>): Incident {
   const newId = incidentRepository.generateNextId();
+  const createdAt = new Date().toISOString();
   const newIncident: Incident = {
     ...data,
     id: newId,
-    createdAt: new Date().toISOString(),
+    createdAt,
     status: 'Новое',
     resultConfirmed: false,
-    comments: [{ id: `c-${Date.now()}`, author: data.createdBy, role: data.authorRole, content: `Обращение создано в ПРИИЗ. Тип: ${data.incidentType}, ИНЗ: ${data.inz}.`, createdAt: new Date().toISOString() }],
+    comments: [{
+      id: `c-${Date.now()}`,
+      author: data.createdBy,
+      role: data.authorRole,
+      content: `Обращение создано в ПРИИЗ. ИНЗ: ${data.inz}.`,
+      createdAt,
+    }],
   };
 
+  incidentRepository.save(newIncident);
+
   serviceDeskAdapter.syncWithServiceDesk(newIncident).then((res) => {
-    newIncident.internalServiceDeskId = res.internalTicketId;
-    newIncident.comments.push({ id: `c-${Date.now()}-itilium`, author: 'ПРИИЗ', role: 'Администратор', content: `DEMO: обращение зарегистрировано в 1C:ITILIUM, номер ${res.internalTicketId}.`, createdAt: res.syncedAt, isInternal: true });
-    incidentRepository.save(newIncident);
+    const latest = incidentRepository.getById(newIncident.id);
+    if (!latest) return;
+    latest.internalServiceDeskId = res.internalTicketId;
+    latest.comments.push({
+      id: `c-${Date.now()}-itilium`,
+      author: 'ПРИИЗ',
+      role: 'Администратор',
+      content: `DEMO: обращение зарегистрировано в 1C:ITILIUM, номер ${res.internalTicketId}.`,
+      createdAt: res.syncedAt,
+      isInternal: true,
+    });
+    incidentRepository.save(latest);
+  }).catch(() => {
+    // Public DEMO intentionally keeps the client flow usable even if the mock adapter fails.
   });
 
-  return incidentRepository.save(newIncident);
+  return newIncident;
 }
 
 export function addIncidentComment(incidentId: string, author: string, role: UserRole, content: string, isInternal?: boolean): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
-  const newComment: IncidentComment = { id: `c-${Date.now()}`, author, role, content, createdAt: new Date().toISOString(), isInternal };
+  if (incident.status === 'Закрыт') throw new Error('Closed incident cannot receive new comments');
 
-  if (role === 'Инженер ГСТИ' || role === 'Support') {
-    if (content.toLowerCase().includes('уточн')) {
+  const trimmed = content.trim();
+  if (!trimmed) return incident;
+
+  const newComment: IncidentComment = {
+    id: `c-${Date.now()}`,
+    author,
+    role,
+    content: trimmed,
+    createdAt: new Date().toISOString(),
+    isInternal,
+  };
+
+  if (role === 'Инженер ГСТИ') {
+    if (trimmed.toLowerCase().includes('уточн')) {
       incident.clarificationCount = (incident.clarificationCount || 0) + 1;
       incident.status = 'Ожидает ответа';
+      incident.resultConfirmed = false;
     } else if (incident.status === 'Новое' || incident.status === 'Ожидает ответа') {
       incident.status = 'В работе';
+      incident.resultConfirmed = false;
     }
   } else if ((role === 'Инициатор' || role === 'ДКП') && incident.status === 'Ожидает ответа') {
     incident.status = 'В работе';
+    incident.resultConfirmed = false;
   }
 
   incident.comments.push(newComment);
@@ -52,31 +88,58 @@ export function addIncidentComment(incidentId: string, author: string, role: Use
 export function updateIncidentStatus(incidentId: string, status: IncidentStatus): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
+  if (incident.status === 'Закрыт') throw new Error('Closed incident status cannot be changed');
   if (incident.status === status) return incident;
+
   incident.status = status;
   if (status !== 'Выполнено') incident.resultConfirmed = false;
-  incident.comments.push({ id: `c-${Date.now()}-status`, author: '1C:ITILIUM → ПРИИЗ', role: 'Инженер ГСТИ', content: `Статус обращения изменен на «${status}».`, createdAt: new Date().toISOString() });
+  incident.comments.push({
+    id: `c-${Date.now()}-status`,
+    author: '1C:ITILIUM → ПРИИЗ',
+    role: 'Инженер ГСТИ',
+    content: `Статус обращения изменен на «${status}».`,
+    createdAt: new Date().toISOString(),
+  });
   return incidentRepository.save(incident);
 }
 
 export function confirmResultReceipt(incidentId: string, authorName: string, role: UserRole): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
-  incident.status = 'Выполнено';
+  if (role !== 'Инициатор') throw new Error('Only Initiator can confirm result receipt in the current prototype');
+  if (incident.status !== 'Выполнено') throw new Error('Result can be confirmed only for completed work');
+  if (incident.resultConfirmed) return incident;
+
   incident.resultConfirmed = true;
-  incident.comments.push({ id: `c-${Date.now()}`, author: authorName, role, content: 'Получение результата подтверждено. Обращение готово к финальному закрытию инженером.', createdAt: new Date().toISOString() });
+  incident.comments.push({
+    id: `c-${Date.now()}`,
+    author: authorName,
+    role,
+    content: 'Получение результата подтверждено. Обращение готово к финальному закрытию инженером.',
+    createdAt: new Date().toISOString(),
+  });
   return incidentRepository.save(incident);
 }
 
 export function closeIncident(incidentId: string, authorName: string, rootCause: string, resolution: string): Incident {
   const incident = incidentRepository.getById(incidentId);
   if (!incident) throw new Error(`Incident with ID ${incidentId} not found`);
+  if (incident.status !== 'Выполнено' || !incident.resultConfirmed) {
+    throw new Error('Incident can be closed only after completed work is confirmed by Initiator');
+  }
+
   incident.status = 'Закрыт';
-  incident.rootCause = rootCause || 'Причина TBD';
-  incident.resolution = resolution || 'Решение зафиксировано инженером';
+  incident.rootCause = rootCause.trim();
+  incident.resolution = resolution.trim();
   incident.resolvedAt = new Date().toISOString();
   incident.reusableKnowledge = true;
-  incident.comments.push({ id: `c-${Date.now()}`, author: authorName, role: 'Инженер ГСТИ', content: `Обращение закрыто. Причина: [${incident.rootCause}]. Решение: ${incident.resolution}`, createdAt: new Date().toISOString() });
+  incident.comments.push({
+    id: `c-${Date.now()}`,
+    author: authorName,
+    role: 'Инженер ГСТИ',
+    content: `Обращение закрыто. Причина: ${incident.rootCause}. Решение: ${incident.resolution}.`,
+    createdAt: new Date().toISOString(),
+  });
   return incidentRepository.save(incident);
 }
 
@@ -89,5 +152,22 @@ export function getProductMetrics(): IncidentMetrics {
   const firstTimeCompletenessRate = total > 0 ? Math.round((fullDataCount / total) * 1000) / 10 : 0;
   const totalClarifications = allIncidents.reduce((acc, i) => acc + (i.clarificationCount || 0), 0);
   const avgClarificationCount = total > 0 ? Math.round((totalClarifications / total) * 10) / 10 : 0;
-  return { firstTimeCompletenessRate, avgClarificationCount, avgTimeToFullDataMinutes: 12, selfServiceRate: 38.2, mttrMinutes: 42, repeatIncidentRate: 4.1, nonPriizIncidentShare: 18, typeBreakdown: [{ type: 'INC-02', label: 'Не получен результат', count: total, mttrMinutes: 42, repeatRate: 4.1, responsibleTeam: 'Инженер ГСТИ' }] };
+
+  return {
+    firstTimeCompletenessRate,
+    avgClarificationCount,
+    avgTimeToFullDataMinutes: 12,
+    selfServiceRate: 38.2,
+    mttrMinutes: 42,
+    repeatIncidentRate: 4.1,
+    nonPriizIncidentShare: 18,
+    typeBreakdown: [{
+      type: 'INC-02',
+      label: 'Не получен результат',
+      count: total,
+      mttrMinutes: 42,
+      repeatRate: 4.1,
+      responsibleTeam: 'Инженер ГСТИ',
+    }],
+  };
 }
