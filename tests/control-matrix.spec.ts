@@ -30,7 +30,7 @@ test('проверены активные и будущие модули, GOVIN 
   await expect(page.getByText('Сводка маппинга')).toBeVisible();
 
   await page.getByRole('button', { name: /S3 · Ошибка чекина/ }).click();
-  await expect(page.getByText('Ошибка чекина / маппинг биоматериала')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ошибка чекина / маппинг биоматериала' })).toBeVisible();
   await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Инженер ГСТИ', exact: true }).click();
