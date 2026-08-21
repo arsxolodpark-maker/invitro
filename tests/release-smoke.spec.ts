@@ -15,23 +15,32 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: навигация, поиск направления и перенос контекста GOVIN → ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.5 - три этапа и перенос контекста в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Проверка статуса направления' })).toBeVisible();
-  await expect(page.getByText('Ошибка доставки')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
+  await expect(page.getByText('Три контрольных этапа ДКП: получение услуг → чекин → доставка результатов.')).toBeVisible();
 
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
+  await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
   await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Ошибка доставки')).toBeVisible();
-  await expect(page.getByText('942476082, 942476083, 942476084')).toBeVisible();
+  await expect(page.getByText('DIR-DEMO-001')).toBeVisible();
+  await expect(page.getByText('Этап 1')).toBeVisible();
+  await expect(page.getByText('Этап 2')).toBeVisible();
+  await expect(page.getByText('Этап 3')).toBeVisible();
+  await expect(page.getByText('Сводка маппинга')).toBeVisible();
+  await expect(page.getByText('Создать инцидент в ПРИИЗ')).toHaveCount(0);
 
-  await page.getByRole('button', { name: /Создать обращение в ПРИИЗ/ }).click();
+  await page.getByRole('button', { name: /S4 · Ошибка доставки/ }).click();
+  await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
+  await expect(page.getByText('NMU-T05')).toBeVisible();
+  await expect(page.getByText(/ГСТИ \/ техническая поддержка/).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Создать инцидент в ПРИИЗ' }).click();
+
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
-  await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476082');
+  await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476084');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
-  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/1236514265/);
-
-  await page.getByRole('button', { name: 'Назад к обращениям' }).click();
-  await expect(page.getByRole('heading', { name: 'Обращения', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/4236514265/);
+  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/нет маппинга теста/i);
 });
 
 test('PРИИЗ: полный путь ДКП → Инициатор → Инженер → подтверждение → закрытие', async ({ page }) => {
