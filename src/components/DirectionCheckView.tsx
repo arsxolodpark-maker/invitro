@@ -79,7 +79,7 @@ const demoDirections: DemoDirection[] = [
       { id: 'checkin', number: 2, title: 'Чекин', mappingType: 'Маппинг услуг', state: 'pending', summary: 'Чекин ещё не выполнен.', action: 'После исправления маппинга система повторно проверит услуги на чекине.' },
       { id: 'delivery', number: 3, title: 'Доставка результатов', mappingType: 'Маппинг тестов', state: 'pending', summary: 'Этап ещё не наступил.', action: 'Контроль тестового маппинга выполняется на этапе доставки.' },
     ],
-    issueLabel: 'Нет маппинга услуги', recommendedRoute: 'Сопровождение маппинга', incidentDescription: 'На этапе создания направления отсутствует маппинг услуги. Требуется проверить код услуги INVITRO и код услуги в МИС/ЛИС, исправить сопоставление до чекина.',
+    issueLabel: 'Нет маппинга услуги', recommendedRoute: 'Сопровождение маппинга (точная команда — TBD)', incidentDescription: 'На этапе создания направления отсутствует маппинг услуги. Требуется проверить код услуги INVITRO и код услуги в МИС/ЛИС, исправить сопоставление до чекина.',
   },
   {
     scenario: 'S3', integration: 'Брегис', barcode: '3236514265', externalId: 'DIR-DEMO-003', client: 'Демо-клиент 3', clientCode: 'CLI-DEMO-03', lpu: 'ЛПУ · DEMO 03', createdAt: '21.08.2026 10:05', inz: ['942476083'], serviceName: 'Услуга обследования · DEMO', assignedTests: ['Тест C · DEMO'], deliveredResults: [], sourceStatus: 'Ошибка чекина', databaseState: 'Направление и внутренний заказ найдены',
@@ -92,7 +92,7 @@ const demoDirections: DemoDirection[] = [
       { id: 'checkin', number: 2, title: 'Чекин', mappingType: 'Маппинг услуг', state: 'error', summary: 'Чекин не прошёл: обнаружен некорректный маппинг биоматериала.', action: 'Оперативно исправить маппинг. Если нечекин вызван отсутствием маппинга, направить заявку на ручное лабораторное исполнение.' },
       { id: 'delivery', number: 3, title: 'Доставка результатов', mappingType: 'Маппинг тестов', state: 'pending', summary: 'Доставка не началась.', action: 'После успешного чекина перейти к контролю тестового маппинга.' },
     ],
-    issueLabel: 'Ошибка чекина / маппинг биоматериала', recommendedRoute: 'Сопровождение маппинга + при необходимости ручное лабораторное исполнение', incidentDescription: 'На этапе чекина обнаружена ошибка маппинга биоматериала. Требуется исправить сопоставление. При нечекине из-за отсутствующего маппинга предусмотреть ручное лабораторное исполнение заявки.',
+    issueLabel: 'Ошибка чекина / маппинг биоматериала', recommendedRoute: 'Сопровождение маппинга (точная команда — TBD) + при необходимости ручное лабораторное исполнение', incidentDescription: 'На этапе чекина обнаружена ошибка маппинга биоматериала. Требуется исправить сопоставление. При нечекине из-за отсутствующего маппинга предусмотреть ручное лабораторное исполнение заявки.',
   },
   {
     scenario: 'S4', integration: 'Нетрика', barcode: '4236514265', externalId: 'DIR-DEMO-004', client: 'Демо-клиент 4', clientCode: 'CLI-DEMO-04', lpu: 'ЛПУ · DEMO 04', createdAt: '21.08.2026 10:30', inz: ['942476084'], serviceName: 'Профиль обследования · DEMO', assignedTests: ['Тест D · качественный', 'Тест E · количественный'], deliveredResults: ['Тест D · результат сформирован'], sourceStatus: 'Ошибка доставки', databaseState: 'Направление, заказ и результаты найдены',
@@ -106,7 +106,7 @@ const demoDirections: DemoDirection[] = [
       { id: 'checkin', number: 2, title: 'Чекин', mappingType: 'Маппинг услуг', state: 'ok', summary: 'Чекин пройден.', action: 'Направление передано дальше.' },
       { id: 'delivery', number: 3, title: 'Доставка результатов', mappingType: 'Маппинг тестов', state: 'error', summary: 'У одного теста отсутствует маппинг. Автоматическая доставка результата по нему не выполнена.', action: 'Исправить тестовый маппинг и повторно инициировать отправку результата. Для интеграции в поддержке - через заявку ГСТИ; для интеграции на сопровождении разработки - в чат «Ежевика».' },
     ],
-    issueLabel: 'Ошибка доставки / нет маппинга теста', recommendedRoute: 'ГСТИ / техническая поддержка либо команда разработки / чат «Ежевика» - зависит от стадии сопровождения интеграции', incidentDescription: 'На этапе доставки отсутствует маппинг теста. Требуется исправить тестовый маппинг и повторно инициировать отправку результата. Маршрут повторной отправки зависит от того, передана ли интеграция в поддержку.',
+    issueLabel: 'Ошибка доставки / нет маппинга теста', recommendedRoute: 'ГСТИ / техническая поддержка либо команда разработки / чат «Ежевика» - зависит от стадии сопровождения интеграции (источник стадии — TBD)', incidentDescription: 'На этапе доставки отсутствует маппинг теста. Требуется исправить тестовый маппинг и повторно инициировать отправку результата. Маршрут повторной отправки зависит от того, передана ли интеграция в поддержку.',
   },
   {
     scenario: 'S5', integration: 'Нетрика', barcode: '9999999999', externalId: '', client: '', clientCode: '', lpu: '', createdAt: '', inz: [], serviceName: '', assignedTests: [], deliveredResults: [], sourceStatus: 'Не найдено', databaseState: 'В DEMO-БД направление не найдено', mappingRows: [], stages: [], issueLabel: 'Направление не найдено в базе данных', recommendedRoute: 'Техническая поддержка / ГСТИ', incidentDescription: 'Направление не найдено в системе по переданному идентификатору. Требуется проверить идентификатор, интеграцию и наличие данных в базе.',
@@ -149,13 +149,24 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
   const createIncident = (direction: DemoDirection) => {
     onCreateIncident({
       source: 'GOVIN-303',
-      client: direction.client || 'Демо-клиент',
-      clientCode: direction.clientCode || 'CLI-DEMO',
-      lpu: direction.lpu || 'ЛПУ · DEMO',
+      client: direction.client || undefined,
+      clientCode: direction.clientCode || undefined,
+      lpu: direction.lpu || undefined,
       vendor: direction.integration,
       inz: direction.inz.join(', '),
       contextLabel: `${direction.integration} · ${direction.issueLabel || direction.sourceStatus} · ${direction.barcode}`,
       description: `GOVIN v0.5 · ${direction.issueLabel || direction.sourceStatus}. Этап: ${direction.stages.find((stage) => stage.state === 'error')?.title || 'Проверка направления'}. Клиент: ${direction.client || 'нет данных'}. ЛПУ: ${direction.lpu || 'нет данных'}. ИНЗ: ${direction.inz.join(', ') || 'не присвоен'}. Интеграция: ${direction.integration}. ${direction.incidentDescription || ''} Рекомендованный маршрут: ${direction.recommendedRoute || 'уточнить по регламенту'}.`,
+    });
+  };
+
+  const createNotFoundIncident = () => {
+    if (!integration || !barcode.trim()) return;
+    onCreateIncident({
+      source: 'GOVIN-303',
+      vendor: integration,
+      inz: '',
+      contextLabel: `${integration} · направление не найдено · ${barcode.trim()}`,
+      description: `GOVIN v0.5 · Направление не найдено в базе данных. Идентификатор: ${barcode.trim()}. Интеграция: ${integration}. Клиент, ЛПУ и ИНЗ в GOVIN не определены и должны быть дополнены вручную. Требуется проверить идентификатор, интеграцию и наличие данных в базе. Рекомендованный маршрут: техническая поддержка / ГСТИ.`,
     });
   };
 
@@ -179,7 +190,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
 
       {notFound && (
         <div className="bg-white rounded-2xl border border-amber-200 p-6 shadow-xs">
-          <div className="flex gap-3"><CircleHelp className="w-5 h-5 text-amber-600 mt-0.5"/><div><h2 className="font-extrabold text-slate-900">Направление не найдено</h2><p className="text-sm text-slate-600 mt-1">Проверьте номер/штрихкод и выбранную интеграцию. Если данных нет в базе, регламент требует эскалации в техническую поддержку.</p><div className="mt-3 text-xs rounded-lg border border-amber-200 bg-amber-50 p-3"><strong>Маршрут:</strong> техническая поддержка / ГСТИ. Автоматический поиск по всем интеграциям не выполняется.</div></div></div>
+          <div className="flex gap-3"><CircleHelp className="w-5 h-5 text-amber-600 mt-0.5"/><div className="flex-1"><h2 className="font-extrabold text-slate-900">Направление не найдено</h2><p className="text-sm text-slate-600 mt-1">Проверьте номер/штрихкод и выбранную интеграцию. Если данных нет в базе, регламент требует эскалации в техническую поддержку.</p><div className="mt-3 text-xs rounded-lg border border-amber-200 bg-amber-50 p-3"><strong>Маршрут:</strong> техническая поддержка / ГСТИ. Автоматический поиск по всем интеграциям не выполняется.</div><button type="button" onClick={createNotFoundIncident} className="mt-4 px-4 py-2 rounded-lg border border-[#8bd2d6] bg-white text-[#007f89] font-bold text-sm inline-flex items-center gap-2 hover:bg-[#e9f8f8]">Создать инцидент в ПРИИЗ <ArrowRight className="w-4 h-4"/></button></div></div>
         </div>
       )}
 
