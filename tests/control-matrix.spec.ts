@@ -28,7 +28,7 @@ test('проверены активные и будущие модули, вал
   await page.getByText('PRIIZ-000245', { exact: true }).click();
   await page.getByRole('button', { name: 'Диагностика · DEMO' }).click();
   await expect(page.getByText('Integration Console')).toBeVisible();
-  await expect(page.getByText('ИНЗ')).toBeVisible();
+  await expect(page.getByText('ИНЗ', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Закрыть консоль' }).click();
   await expect(page.getByText('Integration Console')).toHaveCount(0);
 });
