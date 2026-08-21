@@ -13,11 +13,12 @@ interface Props {
 export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack, onSubmit }) => {
   const initiator = useMemo(() => getInitiatorSession() || getLatestInitiator(), []);
   const isExternal = currentRole === 'Инициатор';
-  const [client, setClient] = useState(prefill?.client || (isExternal ? initiator.organization : 'ООО «Демо-клиент»'));
-  const [clientCode, setClientCode] = useState(prefill?.clientCode || (isExternal ? initiator.clientCode : 'CLI-DEMO-01'));
-  const [lpu, setLpu] = useState(prefill?.lpu || 'Подразделение клиента · DEMO');
-  const [inz, setInz] = useState(prefill?.inz || '998877665');
-  const [vendor, setVendor] = useState(prefill?.vendor || 'Вендор МИС · DEMO');
+  const fromGovin = prefill?.source === 'GOVIN-303';
+  const [client, setClient] = useState(fromGovin ? (prefill?.client ?? '') : (prefill?.client || (isExternal ? initiator.organization : 'ООО «Демо-клиент»')));
+  const [clientCode, setClientCode] = useState(fromGovin ? (prefill?.clientCode ?? '') : (prefill?.clientCode || (isExternal ? initiator.clientCode : 'CLI-DEMO-01')));
+  const [lpu, setLpu] = useState(fromGovin ? (prefill?.lpu ?? '') : (prefill?.lpu || 'Подразделение клиента · DEMO'));
+  const [inz, setInz] = useState(fromGovin ? (prefill?.inz ?? '') : (prefill?.inz || '998877665'));
+  const [vendor, setVendor] = useState(fromGovin ? (prefill?.vendor ?? '') : (prefill?.vendor || 'Вендор МИС · DEMO'));
   const [description, setDescription] = useState(prefill?.description || 'DEMO: результат исследования не отображается в системе клиента.');
   const [vendorContacted, setVendorContacted] = useState(false);
   const [vendorAnswer, setVendorAnswer] = useState('');
@@ -63,16 +64,16 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack,
         <p className="text-sm text-slate-500 mt-2">Заполните данные, которые нужны для начала обработки обращения.</p>
       </div>
 
-      {prefill?.source === 'GOVIN-303' && <div className="rounded-xl border border-[#bce8e8] bg-[#eefafa] p-4 flex items-start gap-3 text-sm text-slate-700"><Waypoints className="w-5 h-5 text-[#0099a8] shrink-0 mt-0.5"/><div><strong className="text-[#17383d]">Данные перенесены из «Проверки направления».</strong><div className="text-xs mt-1 text-slate-600">{prefill.contextLabel || 'Контекст направления'} · проверьте данные перед отправкой.</div></div></div>}
+      {fromGovin && <div className="rounded-xl border border-[#bce8e8] bg-[#eefafa] p-4 flex items-start gap-3 text-sm text-slate-700"><Waypoints className="w-5 h-5 text-[#0099a8] shrink-0 mt-0.5"/><div><strong className="text-[#17383d]">Данные перенесены из «Проверки направления».</strong><div className="text-xs mt-1 text-slate-600">{prefill?.contextLabel || 'Контекст направления'} · доступны только фактически известные GOVIN поля. Пустые значения нужно дополнить вручную.</div></div></div>}
 
       <form onSubmit={submit} className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs space-y-5">
         {isExternal && <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600"><strong>Профиль:</strong> {initiator.email} · {initiator.organization}. Организация и код клиента уже заполнены.</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label><span className="text-xs font-bold text-slate-700">Клиент *</span><input required value={client} readOnly={isExternal} onChange={(e) => setClient(e.target.value)} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
-          <label><span className="text-xs font-bold text-slate-700">Код клиента *</span><input required value={clientCode} readOnly={isExternal} onChange={(e) => setClientCode(e.target.value)} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
-          <label><span className="text-xs font-bold text-slate-700">ЛПУ / подразделение</span><input value={lpu} onChange={(e) => setLpu(e.target.value)} className={common} /></label>
-          <label><span className="text-xs font-bold text-slate-700">ИНЗ / номер заявки *</span><input required value={inz} onChange={(e) => setInz(e.target.value)} className={common} /></label>
-          <label className="md:col-span-2"><span className="text-xs font-bold text-slate-700">Вендор / интеграция</span><input value={vendor} onChange={(e) => setVendor(e.target.value)} className={common} /></label>
+          <label><span className="text-xs font-bold text-slate-700">Клиент *</span><input required value={client} readOnly={isExternal} onChange={(e) => setClient(e.target.value)} placeholder={fromGovin && !client ? 'Дополните вручную' : undefined} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
+          <label><span className="text-xs font-bold text-slate-700">Код клиента *</span><input required value={clientCode} readOnly={isExternal} onChange={(e) => setClientCode(e.target.value)} placeholder={fromGovin && !clientCode ? 'Дополните вручную' : undefined} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
+          <label><span className="text-xs font-bold text-slate-700">ЛПУ / подразделение</span><input value={lpu} onChange={(e) => setLpu(e.target.value)} placeholder={fromGovin && !lpu ? 'Нет данных GOVIN' : undefined} className={common} /></label>
+          <label><span className="text-xs font-bold text-slate-700">ИНЗ / номер заявки *</span><input required value={inz} onChange={(e) => setInz(e.target.value)} placeholder={fromGovin && !inz ? 'ИНЗ не присвоен / дополните вручную' : undefined} className={common} /></label>
+          <label className="md:col-span-2"><span className="text-xs font-bold text-slate-700">Вендор / интеграция</span><input value={vendor} onChange={(e) => setVendor(e.target.value)} placeholder={fromGovin && !vendor ? 'Нет данных GOVIN' : undefined} className={common} /></label>
           <label className="md:col-span-2"><span className="text-xs font-bold text-slate-700">Описание проблемы *</span><textarea required value={description} onChange={(e) => setDescription(e.target.value)} className={`${common} min-h-24`} /></label>
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={vendorContacted} onChange={(e) => setVendorContacted(e.target.checked)} />Уже обращались к вендору</label>
