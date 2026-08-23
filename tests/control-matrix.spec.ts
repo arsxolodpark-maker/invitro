@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('проверены активные и будущие модули, GOVIN v0.5.2 и инженерная диагностика', async ({ page }) => {
+test('проверены активные и будущие модули, GOVIN v0.5.3 и инженерная диагностика', async ({ page }) => {
   for (const moduleName of ['ОМС / лимиты', 'Маркетплейс', 'Покрытие', 'Платформа']) {
     await expect(page.getByRole('button', { name: new RegExp(`^${moduleName}`) })).toBeDisabled();
   }
@@ -30,9 +30,11 @@ test('проверены активные и будущие модули, GOVIN 
   await expect(page.getByText('Сводка маппинга')).toBeVisible();
 
   await page.getByRole('button', { name: /Демо-сценарии/ }).click();
-  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга/ }).click();
-  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга биоматериала' })).toBeVisible();
+  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
+  await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
   await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
+  await expect(page.getByText(/биоматериал/i)).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Инженер ГСТИ', exact: true }).click();
   await page.getByText('PRIIZ-000245', { exact: true }).click();
