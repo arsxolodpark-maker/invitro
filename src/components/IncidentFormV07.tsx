@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ArrowLeft, CheckCircle2, Info, Send, Waypoints } from 'lucide-react';
 import { Incident, IncidentPrefill, UserRole } from '../types';
 import { getInitiatorSession, getLatestInitiator } from '../services/users';
+import { ActionHint } from './ActionHint';
 
 interface Props {
   currentRole: UserRole;
@@ -66,7 +67,13 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack,
 
   return (
     <div className="max-w-3xl mx-auto py-4 pb-16 space-y-5 notranslate" translate="no">
-      <button type="button" onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />{fromGovin ? 'Назад в GOVIN' : 'Назад к обращениям'}</button>
+      {fromGovin ? (
+        <ActionHint text="Вернёт к той же проверке направления без потери текущего GOVIN-контекста.">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />Назад в GOVIN</button>
+        </ActionHint>
+      ) : (
+        <button type="button" onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />Назад к обращениям</button>
+      )}
       <div className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs">
         <div className="flex items-center gap-2 flex-wrap"><span className="text-xs font-bold px-2.5 py-1 rounded bg-[#e9f8f8] text-[#007f89]">{fromGovin ? 'GOVIN → ПРИИЗ' : 'INC-02'}</span><h1 className="text-xl font-extrabold text-[#17383d]">{formTitle}</h1></div>
         <p className="text-sm text-slate-500 mt-2">{fromGovin ? 'Контекст проблемы перенесён из проверки направления. Проверьте доступные данные перед созданием обращения.' : 'Заполните данные, которые нужны для начала обработки обращения.'}</p>
@@ -87,7 +94,15 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack,
         <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={vendorContacted} onChange={(e) => setVendorContacted(e.target.checked)} />Уже обращались к вендору</label>
         {vendorContacted && <textarea value={vendorAnswer} onChange={(e) => setVendorAnswer(e.target.value)} placeholder="Кратко укажите ответ вендора" className={`${common} min-h-20`} />}
         <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600 flex gap-2"><Info className="w-4 h-4 text-[#0099a8] shrink-0" /><span>{fromGovin ? 'После создания ПРИИЗ должен вернуть номер и статус обращения. Промышленный контракт этой связи остаётся TBD.' : 'После создания обращение будет связано с 1C:ITILIUM, а его статус появится в ПРИИЗ.'}</span></div>
-        <div className="flex justify-end"><button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button></div>
+        <div className="flex justify-end">
+          {fromGovin ? (
+            <ActionHint text="После подтверждения ПРИИЗ создаст обращение. В целевом процессе вы получите номер и текущий статус обращения.">
+              <button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button>
+            </ActionHint>
+          ) : (
+            <button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button>
+          )}
+        </div>
       </form>
       {!isExternal && !fromGovin && <div className="flex items-center gap-2 text-xs text-emerald-700"><CheckCircle2 className="w-4 h-4" />Инженерная обработка выполняется в контуре 1C:ITILIUM.</div>}
     </div>
