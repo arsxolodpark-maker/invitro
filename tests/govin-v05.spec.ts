@@ -5,6 +5,7 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
+  await page.getByRole('button', { name: /Демо-сценарии/ }).click();
 });
 
 test('GOVIN S2: отсутствующий ИНЗ не подменяется DEMO-значением в ПРИИЗ', async ({ page }) => {
