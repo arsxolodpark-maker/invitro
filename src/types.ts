@@ -9,7 +9,7 @@ export type IncidentStatus = 'Новое' | 'В работе' | 'Отложен�
 export type IntegrationType = 'типовая' | 'кастомная';
 export type ProblemScope = 'единичная' | 'несколько' | 'массовая' | 'неизвестно';
 export type WorkedBefore = 'да' | 'нет' | 'неизвестно';
-export type GovinIssueClass = 'SERVICE_MAPPING' | 'BIOMATERIAL_MAPPING' | 'TEST_MAPPING' | 'DATABASE_NOT_FOUND';
+export type GovinIssueClass = 'SERVICE_MAPPING' | 'TEST_MAPPING' | 'DATABASE_NOT_FOUND';
 
 export interface IncidentPrefill {
   source: 'GOVIN-303';
