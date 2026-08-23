@@ -25,11 +25,18 @@ test('GOVIN S2: маппинг услуги до чекина создаёт п�
   await expect(page.getByText('ИНЗ не присвоен / нет данных')).toBeVisible();
 });
 
-test('GOVIN S3: нечекин из-за отсутствующего маппинга ведёт к ручному лабораторному исполнению', async ({ page }) => {
-  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга/ }).click();
-  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга биоматериала' })).toBeVisible();
+test('GOVIN S3: нечекин из-за отсутствующего маппинга услуги ведёт к ручному лабораторному исполнению', async ({ page }) => {
+  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
+  await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
   await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
   await expect(page.getByText('Нет маппинга', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText(/биоматериал/i)).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
+  await expect(page.getByRole('heading', { name: 'Нечекин из-за отсутствующего маппинга услуги' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Описание проблемы *', exact: true })).toHaveValue(/отсутствует маппинг услуги/);
+  await expect(page.getByRole('textbox', { name: 'Описание проблемы *', exact: true })).not.toHaveValue(/биоматериал/i);
 });
 
 test('GOVIN S4: при отсутствии маппинга теста доставка отменена и требуется повторная отправка', async ({ page }) => {
@@ -38,6 +45,11 @@ test('GOVIN S4: при отсутствии маппинга теста дост
   await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
   await expect(page.getByText(/повторно инициировать отправку результата/i).first()).toBeVisible();
   await expect(page.getByText(/ГСТИ, если интеграция в поддержке/).first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
+  await expect(page.getByRole('heading', { name: 'Ошибка доставки результатов' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Описание проблемы *', exact: true })).toHaveValue(/доставка результатов отменена/i);
+  await expect(page.getByRole('textbox', { name: 'Описание проблемы *', exact: true })).toHaveValue(/повторно инициировать отправку результата/i);
 });
 
 test('GOVIN S5: не найдено можно создать без вымышленных клиента и ИНЗ', async ({ page }) => {
