@@ -23,7 +23,13 @@ test('GOVIN v0.5.4: подсказки следующего шага работ�
   const priizButton = page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' });
   if (width >= 768) {
     await priizButton.hover();
-    await expect(page.getByRole('tooltip').filter({ hasText: /Из GOVIN автоматически перенесутся известные данные/ })).toBeVisible();
+    const hint = page.getByRole('tooltip').filter({ hasText: /Из GOVIN автоматически перенесутся известные данные/ });
+    await expect(hint).toBeVisible();
+    const [buttonBox, hintBox] = await Promise.all([priizButton.boundingBox(), hint.boundingBox()]);
+    expect(buttonBox).not.toBeNull();
+    expect(hintBox).not.toBeNull();
+    expect(hintBox!.top).toBeGreaterThanOrEqual(buttonBox!.bottom - 1);
+    expect(hintBox!.width).toBeGreaterThan(360);
   } else {
     await expect(page.getByText(/После нажатия:.*Откроется форма ПРИИЗ/i)).toBeVisible();
   }
@@ -96,5 +102,8 @@ test('GOVIN S5: не найдено можно создать без вымыш�
   await expect(page.getByRole('textbox', { name: 'Описание проблемы *', exact: true })).toHaveValue(/9999999999/);
 
   await page.getByRole('button', { name: 'Создать обращение', exact: true }).click();
-  await expect(page.getByText(/GOVIN → ПРИИЗ · Направление не найдено в БД/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^PRIIZ-\d{6}$/ })).toBeVisible();
+  await expect(page.getByText('Связанный контекст GOVIN', { exact: true })).toBeVisible();
+  await expect(page.getByText(/GOVIN → ПРИИЗ/).first()).toBeVisible();
+  await expect(page.getByText(/Направление не найдено в БД/).first()).toBeVisible();
 });
