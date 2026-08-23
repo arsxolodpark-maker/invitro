@@ -15,9 +15,9 @@ test('GOVIN S2: маппинг услуги до чекина создаёт п�
   await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
 
   await expect(page.getByRole('heading', { name: 'Ошибка маппинга услуги' })).toBeVisible();
-  await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue('');
-  await expect(page.getByLabel('Клиент')).toHaveValue('Демо-клиент 2');
-  await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Адыгея');
+  await expect(page.getByRole('textbox', { name: 'ИНЗ / номер заявки', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Клиент', exact: true })).toHaveValue('Демо-клиент 2');
+  await expect(page.getByRole('textbox', { name: 'Вендор / интеграция', exact: true })).toHaveValue('Адыгея');
   await expect(page.getByText(/Получение услуг \/ создание направления/).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Создать обращение', exact: true }).click();
@@ -46,12 +46,12 @@ test('GOVIN S5: не найдено можно создать без вымыш�
   await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
 
   await expect(page.getByRole('heading', { name: 'Направление не найдено в БД' })).toBeVisible();
-  await expect(page.getByLabel('Клиент')).toHaveValue('');
-  await expect(page.getByLabel('Код клиента')).toHaveValue('');
-  await expect(page.getByLabel('ЛПУ / подразделение')).toHaveValue('');
-  await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue('');
-  await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
-  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/9999999999/);
+  await expect(page.getByRole('textbox', { name: 'Клиент', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Код клиента', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'ЛПУ / подразделение', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'ИНЗ / номер заявки', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Вендор / интеграция', exact: true })).toHaveValue('Нетрика');
+  await expect(page.getByRole('textbox', { name: 'Описание проблемы *', exact: true })).toHaveValue(/9999999999/);
 
   await page.getByRole('button', { name: 'Создать обращение', exact: true }).click();
   await expect(page.getByText(/GOVIN → ПРИИЗ · Направление не найдено в БД/)).toBeVisible();
