@@ -59,8 +59,10 @@ test('PРИИЗ: полный путь ДКП → Инициатор → Инж�
 
   await page.getByRole('button', { name: 'Создать обращение', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: 'Не получен результат' })).toBeVisible();
-  await page.getByLabel('Клиент *').fill('Тестовый клиент');
-  await page.getByLabel('Код клиента *').fill('TEST-001');
+  await expect(page.getByLabel('Клиент *')).toHaveAttribute('readonly', '');
+  await expect(page.getByLabel('Код клиента *')).toHaveAttribute('readonly', '');
+  await expect(page.getByLabel('Клиент *')).not.toHaveValue('');
+  await expect(page.getByLabel('Код клиента *')).not.toHaveValue('');
   await page.getByLabel('ИНЗ / номер заявки *').fill('INZ-QA-001');
   await page.getByLabel('Вендор / интеграция').fill('QA интеграция');
   await page.getByLabel('Описание проблемы *').fill('DEMO: результат не получен');
