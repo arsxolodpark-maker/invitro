@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('проверены активные и будущие модули, GOVIN v0.5 и инженерная диагностика', async ({ page }) => {
+test('проверены активные и будущие модули, GOVIN v0.5.1 и инженерная диагностика', async ({ page }) => {
   for (const moduleName of ['ОМС / лимиты', 'Маркетплейс', 'Покрытие', 'Платформа']) {
     await expect(page.getByRole('button', { name: new RegExp(`^${moduleName}`) })).toBeDisabled();
   }
@@ -29,6 +29,7 @@ test('проверены активные и будущие модули, GOVIN 
   await expect(page.getByText('Этап 3')).toBeVisible();
   await expect(page.getByText('Сводка маппинга')).toBeVisible();
 
+  await page.getByRole('button', { name: /Демо-сценарии/ }).click();
   await page.getByRole('button', { name: /S3 · Ошибка чекина/ }).click();
   await expect(page.getByRole('heading', { name: 'Ошибка чекина / маппинг биоматериала' })).toBeVisible();
   await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
