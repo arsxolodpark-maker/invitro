@@ -28,7 +28,7 @@ test('GOVIN v0.5.4: подсказки следующего шага работ�
     const [buttonBox, hintBox] = await Promise.all([priizButton.boundingBox(), hint.boundingBox()]);
     expect(buttonBox).not.toBeNull();
     expect(hintBox).not.toBeNull();
-    expect(hintBox!.top).toBeGreaterThanOrEqual(buttonBox!.bottom - 1);
+    expect(hintBox!.y).toBeGreaterThanOrEqual(buttonBox!.y + buttonBox!.height - 1);
     expect(hintBox!.width).toBeGreaterThan(360);
   } else {
     await expect(page.getByText(/После нажатия:.*Откроется форма ПРИИЗ/i)).toBeVisible();
