@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: GOVIN v0.5.1 - три этапа и перенос контекста в ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.5.2 - три этапа, отмена доставки и перенос контекста в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
   await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toBeVisible();
@@ -28,20 +28,24 @@ test('ДКП: GOVIN v0.5.1 - три этапа и перенос контекс�
   await expect(page.getByText('Этап 2')).toBeVisible();
   await expect(page.getByText('Этап 3')).toBeVisible();
   await expect(page.getByText('Сводка маппинга')).toBeVisible();
-  await expect(page.getByText('Создать инцидент в ПРИИЗ')).toHaveCount(0);
+  await expect(page.getByText('Создать обращение в ПРИИЗ')).toHaveCount(0);
 
   await page.getByRole('button', { name: /Демо-сценарии/ }).click();
   await page.getByRole('button', { name: /S4 · Ошибка доставки/ }).click();
   await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
   await expect(page.getByText('NMU-T05')).toBeVisible();
-  await expect(page.getByText(/ГСТИ \/ техническая поддержка/).first()).toBeVisible();
-  await page.getByRole('button', { name: 'Создать инцидент в ПРИИЗ' }).click();
+  await expect(page.getByText('Доставка отменена', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
+  await expect(page.getByText(/ГСТИ, если интеграция в поддержке/).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
 
+  await expect(page.getByRole('heading', { name: 'Ошибка доставки результатов' })).toBeVisible();
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
-  await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476084');
+  await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue('942476084');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
   await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/4236514265/);
   await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/нет маппинга теста/i);
+  await expect(page.getByText(/Доставка результатов/).first()).toBeVisible();
 });
 
 test('PРИИЗ: полный путь ДКП → Инициатор → Инженер → подтверждение → закрытие', async ({ page }) => {
