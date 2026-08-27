@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const scenarios = ['S1', 'S2', 'S3', 'S4', 'S5'] as const;
+const standaloneUrl = (scenario: string) => `http://127.0.0.1:3000/govin-v060/?scenario=${scenario}`;
 
 async function expectNoOverflow(page: import('@playwright/test').Page) {
   const { clientWidth, scrollWidth } = await page.evaluate(() => ({
@@ -17,7 +18,7 @@ test('standalone GOVIN v0.6.0: S1-S5 exact public page visual and flow gate', as
   fs.mkdirSync(root, { recursive: true });
 
   for (const scenario of scenarios) {
-    await page.goto(`./govin-v060/?scenario=${scenario}`);
+    await page.goto(standaloneUrl(scenario));
     await expect(page).toHaveTitle('GOVIN-303 · DEMO v0.6.0');
     await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Итог и следующее действие' })).toBeVisible();
@@ -44,7 +45,7 @@ test('standalone v0.6.0: outcome-first copy and primary CTA are correct for ever
   ] as const;
 
   for (const item of cases) {
-    await page.goto(`./govin-v060/?scenario=${item.id}`);
+    await page.goto(standaloneUrl(item.id));
     const outcome = page.getByRole('region', { name: 'Итог и следующее действие' });
     await expect(outcome.getByRole('heading', { name: item.title })).toBeVisible();
     await expect(outcome.getByText(item.action)).toBeVisible();
@@ -58,7 +59,7 @@ test('standalone v0.6.0: S3/S4/S5 open correct PRIIZ context without invented da
     { id: 'S4', title: 'Ошибка доставки результатов', inz: '942476084', vendor: 'Нетрика' },
     { id: 'S5', title: 'Направление не найдено в БД', inz: '', vendor: 'Нетрика' },
   ] as const) {
-    await page.goto(`./govin-v060/?scenario=${item.id}`);
+    await page.goto(standaloneUrl(item.id));
     await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
     await expect(page.getByRole('heading', { name: item.title })).toBeVisible();
     await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue(item.inz);
