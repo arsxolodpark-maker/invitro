@@ -28,7 +28,8 @@ test('проверены активные и будущие модули, вал
   await expect(page.getByText('Итог проверки')).toHaveCount(0);
   await page.getByLabel('Номер направления / штрихкод').fill('3236514265');
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Направление не прошло чекин' })).toBeVisible();
+  await expect(page.getByText('Причина: на чекине отсутствует маппинг услуги.', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Инженер ГСТИ', exact: true }).click();
   await page.getByText('PRIIZ-000245', { exact: true }).click();

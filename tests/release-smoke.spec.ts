@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: GOVIN v0.6.0 — поиск, итог, детали, маппинг и перенос контекста в ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.6.1 — понятный итог, действие, детали, маппинг и перенос в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
   await expect(page.getByText('Итог проверки')).toHaveCount(0);
@@ -25,9 +25,11 @@ test('ДКП: GOVIN v0.6.0 — поиск, итог, детали, маппин�
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
 
   await expect(page.getByText('Итог проверки')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Результаты не доставлены' })).toBeVisible();
+  await expect(page.getByText('Причина: у одного теста отсутствует маппинг. Доставка результатов отменена.', { exact: true })).toBeVisible();
   await expect(page.getByText('Что делать сейчас')).toBeVisible();
-  await expect(page.getByText(/Исправить маппинг теста, загрузить корректный маппинг/)).toBeVisible();
+  await expect(page.getByText('Создайте обращение в ПРИИЗ на исправление маппинга теста и повторную отправку результата.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Создать обращение в ПРИИЗ', exact: true })).toBeVisible();
   await expect(page.getByText('DIR-DEMO-004')).toHaveCount(0);
   await expect(page.getByText('NMU-T05')).toHaveCount(0);
 
@@ -40,7 +42,7 @@ test('ДКП: GOVIN v0.6.0 — поиск, итог, детали, маппин�
   await expect(page.getByText('NMU-T05')).toBeVisible();
   await expect(page.getByText('Нет маппинга', { exact: true }).last()).toBeVisible();
 
-  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
+  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ', exact: true }).click();
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
   await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476084');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
