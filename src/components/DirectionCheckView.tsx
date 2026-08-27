@@ -72,8 +72,8 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
   const resetSearch = () => { setIntegration(''); setBarcode(''); clearResult(); requestAnimationFrame(() => integrationRef.current?.focus()); };
 
   const handleSearch = () => {
-    if (!integration) { setValidationMessage('Выберите интеграцию.'); clearResult(); requestAnimationFrame(() => integrationRef.current?.focus()); return; }
-    if (!barcode.trim()) { setValidationMessage('Введите номер направления или штрихкод.'); setResult(null); setNotFound(false); resetDetails(); requestAnimationFrame(() => barcodeRef.current?.focus()); return; }
+    if (!integration) { setResult(null); setNotFound(false); resetDetails(); setValidationMessage('Выберите интеграцию.'); requestAnimationFrame(() => integrationRef.current?.focus()); return; }
+    if (!barcode.trim()) { setResult(null); setNotFound(false); resetDetails(); setValidationMessage('Введите номер направления или штрихкод.'); requestAnimationFrame(() => barcodeRef.current?.focus()); return; }
     setValidationMessage(''); resetDetails();
     if (matchingScenario && matchingScenario.scenario !== 'S5') { setResult(matchingScenario); setNotFound(false); return; }
     setResult(null); setNotFound(true);
