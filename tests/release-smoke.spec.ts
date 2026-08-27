@@ -21,8 +21,7 @@ test('ДКП: GOVIN v0.6.2 — входящий сигнал → поиск → 
   await expect(page.getByText('Итог проверки')).toHaveCount(0);
 
   await page.getByText('DEMO: входящий сигнал → GOVIN').click();
-  const signalCard = page.locator('div').filter({ hasText: 'S4 · ВХОДЯЩИЙ СИГНАЛ · DEMO' }).filter({ hasText: '4236514265' }).first();
-  await signalCard.getByRole('button', { name: 'Подставить в поиск' }).click();
+  await page.getByRole('button', { name: 'Подставить в поиск', exact: true }).nth(3).click();
   await expect(page.getByLabel('Интеграция')).toHaveValue('Нетрика');
   await expect(page.getByLabel('Штрихкод направления')).toHaveValue('4236514265');
   await expect(page.getByText('Итог проверки')).toHaveCount(0);
