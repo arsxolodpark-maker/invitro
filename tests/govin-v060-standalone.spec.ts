@@ -18,7 +18,7 @@ for (const [scenario, title, directionId, mappingCode] of cases) {
 
     await page.getByRole('button', { name: 'Показать детали проверки' }).click();
     await expect(page.getByText(directionId)).toBeVisible();
-    await expect(page.getByText(mappingCode)).toHaveCount(0);
+    await expect(page.getByText(mappingCode)).toBeHidden();
 
     await page.getByRole('button', { name: 'Показать маппинг' }).click();
     await expect(page.getByText(mappingCode)).toBeVisible();
@@ -33,9 +33,9 @@ test('Standalone GOVIN S5: not found → PRIIZ keeps unknown fields empty', asyn
   await expect(page.getByRole('heading', { name: 'Направление не найдено' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Показать детали проверки' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ', exact: true }).click();
-  await expect(page.getByLabel('Клиент')).toHaveValue('');
-  await expect(page.getByLabel('Код клиента')).toHaveValue('');
-  await expect(page.getByLabel('ЛПУ / подразделение')).toHaveValue('');
-  await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue('');
-  await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
+  await expect(page.getByRole('textbox', { name: 'Клиент', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Код клиента', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'ЛПУ / подразделение', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'ИНЗ / номер заявки', exact: true })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: 'Вендор / интеграция', exact: true })).toHaveValue('Нетрика');
 });
