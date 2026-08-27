@@ -44,8 +44,8 @@ for (const card of cards) {
     await openGovin(page);
 
     await page.getByText('DEMO: входящий сигнал → GOVIN').click();
-    const signalCard = page.locator('div').filter({ hasText: `${card.key} · ВХОДЯЩИЙ СИГНАЛ · DEMO` }).filter({ hasText: card.barcode }).first();
-    await signalCard.getByRole('button', { name: 'Подставить в поиск' }).click();
+    const signalIndex = Number(card.key.slice(1)) - 1;
+    await page.getByRole('button', { name: 'Подставить в поиск', exact: true }).nth(signalIndex).click();
 
     await expect(page.getByLabel('Интеграция')).toHaveValue(card.integration);
     await expect(page.getByLabel('Штрихкод направления')).toHaveValue(card.barcode);
@@ -72,8 +72,7 @@ for (const card of cards) {
 test('GOVIN v0.6.2 S5: сигнал → перепроверка → эскалация', async ({ page }) => {
   await openGovin(page);
   await page.getByText('DEMO: входящий сигнал → GOVIN').click();
-  const signalCard = page.locator('div').filter({ hasText: 'S5 · ВХОДЯЩИЙ СИГНАЛ · DEMO' }).filter({ hasText: '9999999999' }).first();
-  await signalCard.getByRole('button', { name: 'Подставить в поиск' }).click();
+  await page.getByRole('button', { name: 'Подставить в поиск', exact: true }).nth(4).click();
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
 
   await expect(page.getByRole('heading', { name: 'Направление не найдено' })).toBeVisible();
