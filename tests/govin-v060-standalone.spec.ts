@@ -48,7 +48,7 @@ test('standalone v0.6.0: outcome-first copy and primary CTA are correct for ever
     await page.goto(standaloneUrl(item.id));
     const outcome = page.getByRole('region', { name: 'Итог и следующее действие' });
     await expect(outcome.getByRole('heading', { name: item.title })).toBeVisible();
-    await expect(outcome.getByText(item.action)).toBeVisible();
+    await expect(page.locator('#nowText')).toHaveText(item.action);
     await expect(outcome.getByRole('button', { name: item.cta })).toBeVisible();
   }
 });
@@ -62,12 +62,12 @@ test('standalone v0.6.0: S3/S4/S5 open correct PRIIZ context without invented da
     await page.goto(standaloneUrl(item.id));
     await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
     await expect(page.getByRole('heading', { name: item.title })).toBeVisible();
-    await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue(item.inz);
-    await expect(page.getByLabel('Вендор / интеграция')).toHaveValue(item.vendor);
+    await expect(page.getByRole('textbox', { name: 'ИНЗ / номер заявки', exact: true })).toHaveValue(item.inz);
+    await expect(page.getByRole('textbox', { name: 'Вендор / интеграция', exact: true })).toHaveValue(item.vendor);
     if (item.id === 'S5') {
-      await expect(page.getByLabel('Клиент')).toHaveValue('');
-      await expect(page.getByLabel('Код клиента')).toHaveValue('');
-      await expect(page.getByLabel('ЛПУ / подразделение')).toHaveValue('');
+      await expect(page.getByRole('textbox', { name: 'Клиент', exact: true })).toHaveValue('');
+      await expect(page.getByRole('textbox', { name: 'Код клиента', exact: true })).toHaveValue('');
+      await expect(page.getByRole('textbox', { name: 'ЛПУ / подразделение', exact: true })).toHaveValue('');
     }
   }
 });
