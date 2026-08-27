@@ -6,14 +6,13 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('проверены активные и будущие модули, GOVIN v0.5.9 и инженерная диагностика', async ({ page }) => {
+test('проверены активные и будущие модули, GOVIN v0.6.0 и инженерная диагностика', async ({ page }) => {
   for (const moduleName of ['ОМС / лимиты', 'Маркетплейс', 'Покрытие', 'Платформа']) {
     await expect(page.getByRole('button', { name: new RegExp(`^${moduleName}`) })).toBeDisabled();
   }
 
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
-  await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('Выберите интеграцию.');
@@ -25,18 +24,20 @@ test('проверены активные и будущие модули, GOVIN 
 
   await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Итог и следующее действие' }).getByRole('heading', { name: 'С направлением всё в порядке' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Данные направления' })).toHaveCount(0);
+  await page.getByRole('button', { name: /Показать детали проверки/ }).click();
   await expect(page.getByText('DIR-DEMO-001')).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Данные направления' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button')).toHaveCount(3);
-  await expect(page.getByText('Сводка маппинга')).toBeVisible();
 
   await page.getByLabel('Интеграция').selectOption('Брегис');
   await page.getByLabel('Номер направления / штрихкод').fill('3236514265');
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
-  await page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button', { name: /Этап 2.*Чекин/ }).click();
-  await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
   await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Этапы проверки' })).toHaveCount(0);
+  await page.getByRole('button', { name: /Показать детали проверки/ }).click();
+  await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
   await expect(page.getByText(/биоматериал/i)).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Инженер ГСТИ', exact: true }).click();
