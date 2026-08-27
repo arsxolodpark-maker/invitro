@@ -1,15 +1,53 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
-test.beforeEach(async ({ page }) => {
+async function openGovin(page: Page) {
   await page.goto('./');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
-  await page.getByRole('button', { name: /Демо-сценарии/ }).click();
+  await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
+}
+
+async function searchDirection(page: Page, integration: 'Нетрика' | 'Адыгея' | 'Брегис', barcode: string) {
+  await page.getByLabel('Интеграция').selectOption(integration);
+  await page.getByLabel('Номер направления / штрихкод').fill(barcode);
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+}
+
+test.beforeEach(async ({ page }) => {
+  await openGovin(page);
 });
 
-test('GOVIN v0.5.5: карточка направления и этапы компактны, детали раскрываются по клику', async ({ page }) => {
-  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+test('GOVIN v0.5.9: первый экран — простой поиск без псевдошагов и стрелочной цепочки', async ({ page }) => {
+  await expect(page.getByText('Проверить направление', { exact: true }).first()).toBeVisible();
+  await expect(page.getByLabel('Интеграция')).toBeVisible();
+  await expect(page.getByLabel('Номер направления / штрихкод')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Проверить направление', exact: true })).toBeVisible();
+
+  await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toHaveCount(0);
+  await expect(page.getByText(/Шаг 1|Шаг 2|Шаг 3/)).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Этапы проверки' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Выберите интеграцию.');
+  await expect(page.getByLabel('Интеграция')).toBeFocused();
+
+  await page.getByLabel('Интеграция').selectOption('Брегис');
+  await expect(page.getByLabel('Номер направления / штрихкод')).toBeFocused();
+  await expect(page.getByText(/Введите номер для Брегис/)).toBeVisible();
+
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Введите номер направления или штрихкод.');
+  await expect(page.getByLabel('Номер направления / штрихкод')).toBeFocused();
+
+  await page.getByLabel('Номер направления / штрихкод').fill('3236514265');
+  await page.getByLabel('Номер направления / штрихкод').press('Enter');
+  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Этапы проверки' })).toBeVisible();
+});
+
+test('GOVIN v0.5.9: карточка направления и этапы компактны, детали раскрываются по клику', async ({ page }) => {
+  await searchDirection(page, 'Брегис', '3236514265');
 
   const directionData = page.getByRole('region', { name: 'Данные направления' });
   await expect(directionData).toBeVisible();
@@ -38,19 +76,11 @@ test('GOVIN v0.5.5: карточка направления и этапы ком
   await expect(page.getByText('Доставка не началась.')).toBeVisible();
 });
 
-test('GOVIN v0.5.5: подсказки следующего шага работают без визуального шума', async ({ page }) => {
-  const width = page.viewportSize()?.width ?? 1280;
-  const findButton = page.getByRole('button', { name: 'Найти', exact: true });
-
-  if (width >= 768) {
-    await findButton.hover();
-    await expect(page.getByRole('tooltip').filter({ hasText: /Проверит направление в выбранной интеграции/ })).toBeVisible();
-  } else {
-    await expect(page.getByText(/После нажатия:.*Проверит направление в выбранной интеграции/i)).toBeVisible();
-  }
-
-  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+test('GOVIN v0.5.9: подсказка ПРИИЗ не перекрывает следующий шаг', async ({ page }) => {
+  await searchDirection(page, 'Брегис', '3236514265');
   const priizButton = page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' });
+  const width = page.viewportSize()?.width ?? 1280;
+
   if (width >= 768) {
     await priizButton.hover();
     const hint = page.getByRole('tooltip').filter({ hasText: /Из GOVIN автоматически перенесутся известные данные/ });
@@ -65,17 +95,11 @@ test('GOVIN v0.5.5: подсказки следующего шага работ�
   }
 
   await priizButton.click();
-  const backButton = page.getByRole('button', { name: 'Назад в GOVIN', exact: true });
-  if (width >= 768) {
-    await backButton.hover();
-    await expect(page.getByRole('tooltip').filter({ hasText: /Вернёт к той же проверке направления/ })).toBeVisible();
-  } else {
-    await expect(page.getByText(/После нажатия:.*Вернёт к той же проверке направления/i)).toBeVisible();
-  }
+  await expect(page.getByRole('button', { name: 'Назад в GOVIN', exact: true })).toBeVisible();
 });
 
 test('GOVIN S2: маппинг услуги до чекина создаёт правильный тип обращения без обязательного ИНЗ', async ({ page }) => {
-  await page.getByRole('button', { name: /S2 · Нет маппинга услуги/ }).click();
+  await searchDirection(page, 'Адыгея', '2236514265');
   await expect(page.getByRole('heading', { name: 'Нет маппинга услуги' })).toBeVisible();
   await expect(page.getByText(/Исправить маппинг до чекина/).first()).toBeVisible();
   await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
@@ -92,7 +116,7 @@ test('GOVIN S2: маппинг услуги до чекина создаёт п�
 });
 
 test('GOVIN S3: нечекин из-за отсутствующего маппинга услуги ведёт к ручному лабораторному исполнению', async ({ page }) => {
-  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+  await searchDirection(page, 'Брегис', '3236514265');
   await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
   await page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button', { name: /Этап 2.*Чекин/ }).click();
   await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
@@ -107,7 +131,7 @@ test('GOVIN S3: нечекин из-за отсутствующего маппи
 });
 
 test('GOVIN S4: при отсутствии маппинга теста доставка отменена и требуется повторная отправка', async ({ page }) => {
-  await page.getByRole('button', { name: /S4 · Ошибка доставки/ }).click();
+  await searchDirection(page, 'Нетрика', '4236514265');
   await expect(page.getByText('Доставка отменена', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
   await page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button', { name: /Этап 3.*Доставка результатов/ }).click();
@@ -121,7 +145,7 @@ test('GOVIN S4: при отсутствии маппинга теста дост
 });
 
 test('GOVIN S5: не найдено можно создать без вымышленных клиента и ИНЗ', async ({ page }) => {
-  await page.getByRole('button', { name: /S5 · Не найдено/ }).click();
+  await searchDirection(page, 'Нетрика', '9999999999');
   await expect(page.getByRole('heading', { name: 'Направление не найдено' })).toBeVisible();
   await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
 
