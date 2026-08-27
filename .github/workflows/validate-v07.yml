@@ -40,6 +40,14 @@ jobs:
       - name: Release E2E smoke tests
         run: npm run test:e2e
 
+      - name: Upload GOVIN visual QA matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govin-visual-qa
+          path: visual-qa/govin-v060
+          if-no-files-found: ignore
+
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@v4
