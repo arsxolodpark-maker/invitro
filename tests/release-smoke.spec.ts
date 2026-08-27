@@ -15,20 +15,36 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: навигация, поиск направления и перенос контекста GOVIN → ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.6.0 — поиск, итог, детали, маппинг и перенос контекста в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Проверка статуса направления' })).toBeVisible();
-  await expect(page.getByText('Ошибка доставки')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
+  await expect(page.getByText('Итог проверки')).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Ошибка доставки')).toBeVisible();
-  await expect(page.getByText('942476082, 942476083, 942476084')).toBeVisible();
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
+  await page.getByLabel('Номер направления / штрихкод').fill('4236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
 
-  await page.getByRole('button', { name: /Создать обращение в ПРИИЗ/ }).click();
+  await expect(page.getByText('Итог проверки')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
+  await expect(page.getByText('Что делать сейчас')).toBeVisible();
+  await expect(page.getByText(/Исправить маппинг теста, загрузить корректный маппинг/)).toBeVisible();
+  await expect(page.getByText('DIR-DEMO-004')).toHaveCount(0);
+  await expect(page.getByText('NMU-T05')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Показать детали проверки' }).click();
+  await expect(page.getByText('DIR-DEMO-004')).toBeVisible();
+  await expect(page.getByText('Действие ДКП')).toBeVisible();
+  await expect(page.getByText('NMU-T05')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Показать маппинг' }).click();
+  await expect(page.getByText('NMU-T05')).toBeVisible();
+  await expect(page.getByText('Нет маппинга', { exact: true }).last()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
-  await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476082');
+  await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476084');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
-  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/1236514265/);
+  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/4236514265/);
 
   await page.getByRole('button', { name: 'Назад к обращениям' }).click();
   await expect(page.getByRole('heading', { name: 'Обращения', exact: true })).toBeVisible();
