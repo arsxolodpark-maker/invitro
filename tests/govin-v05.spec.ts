@@ -8,7 +8,37 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole('button', { name: /Демо-сценарии/ }).click();
 });
 
-test('GOVIN v0.5.4: подсказки следующего шага работают без визуального шума', async ({ page }) => {
+test('GOVIN v0.5.5: карточка направления и этапы компактны, детали раскрываются по клику', async ({ page }) => {
+  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+
+  const directionData = page.getByRole('region', { name: 'Данные направления' });
+  await expect(directionData).toBeVisible();
+  await expect(directionData.getByText('Демо-клиент 3', { exact: false })).toBeVisible();
+  await expect(directionData.getByText('942476083', { exact: false })).toBeVisible();
+  await expect(directionData.getByText('3236514265', { exact: false })).toBeVisible();
+
+  const stages = page.getByRole('region', { name: 'Этапы проверки' });
+  const stage1 = stages.getByRole('button', { name: /Этап 1.*Получение услуг/ });
+  const stage2 = stages.getByRole('button', { name: /Этап 2.*Чекин/ });
+  const stage3 = stages.getByRole('button', { name: /Этап 3.*Доставка результатов/ });
+  await expect(stage1).toBeVisible();
+  await expect(stage2).toBeVisible();
+  await expect(stage3).toBeVisible();
+  await expect(stage2).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toHaveCount(0);
+
+  await stage2.click();
+  await expect(stage2).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
+  await expect(page.getByText(/Исправить маппинг услуги и направить заявку на ручное лабораторное исполнение/).last()).toBeVisible();
+
+  await stage3.click();
+  await expect(stage2).toHaveAttribute('aria-expanded', 'false');
+  await expect(stage3).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByText('Доставка не началась.')).toBeVisible();
+});
+
+test('GOVIN v0.5.5: подсказки следующего шага работают без визуального шума', async ({ page }) => {
   const width = page.viewportSize()?.width ?? 1280;
   const findButton = page.getByRole('button', { name: 'Найти', exact: true });
 
@@ -64,6 +94,7 @@ test('GOVIN S2: маппинг услуги до чекина создаёт п�
 test('GOVIN S3: нечекин из-за отсутствующего маппинга услуги ведёт к ручному лабораторному исполнению', async ({ page }) => {
   await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
   await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
+  await page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button', { name: /Этап 2.*Чекин/ }).click();
   await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
   await expect(page.getByText(/ручное лабораторное исполнение/).first()).toBeVisible();
   await expect(page.getByText('Нет маппинга', { exact: true }).first()).toBeVisible();
@@ -79,7 +110,8 @@ test('GOVIN S4: при отсутствии маппинга теста дост
   await page.getByRole('button', { name: /S4 · Ошибка доставки/ }).click();
   await expect(page.getByText('Доставка отменена', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
-  await expect(page.getByText(/повторно инициировать отправку результата/i).first()).toBeVisible();
+  await page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button', { name: /Этап 3.*Доставка результатов/ }).click();
+  await expect(page.getByText(/повторно инициировать отправку результата/i).last()).toBeVisible();
   await expect(page.getByText(/ГСТИ, если интеграция в поддержке/).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
