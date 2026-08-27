@@ -15,23 +15,40 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: навигация, поиск направления и перенос контекста GOVIN → ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.6.0 - итог и действие первичны, детали вторичны, контекст уходит в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Проверка статуса направления' })).toBeVisible();
-  await expect(page.getByText('Ошибка доставки')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Детали проверки' })).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Ошибка доставки')).toBeVisible();
-  await expect(page.getByText('942476082, 942476083, 942476084')).toBeVisible();
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
+  await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Итог и следующее действие' }).getByRole('heading', { name: 'С направлением всё в порядке' })).toBeVisible();
+  await expect(page.getByText('DIR-DEMO-001')).toHaveCount(0);
+  await expect(page.getByText('Создать обращение в ПРИИЗ')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Проверить другое направление/ })).toBeVisible();
 
-  await page.getByRole('button', { name: /Создать обращение в ПРИИЗ/ }).click();
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
+  await page.getByLabel('Номер направления / штрихкод').fill('4236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  const outcome = page.getByRole('region', { name: 'Итог и следующее действие' });
+  await expect(outcome.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
+  await expect(outcome.getByText(/повторно инициировать отправку результата/)).toBeVisible();
+  await expect(outcome.getByText(/ГСТИ, если интеграция в поддержке/)).toBeVisible();
+  await expect(page.getByText('NMU-T05')).toHaveCount(0);
+
+  await page.getByRole('button', { name: /Показать детали проверки/ }).click();
+  await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
+  await page.getByRole('button', { name: /Показать маппинг/ }).click();
+  await expect(page.getByText('NMU-T05')).toBeVisible();
+
+  await outcome.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
+  await expect(page.getByRole('heading', { name: 'Ошибка доставки результатов' })).toBeVisible();
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
-  await expect(page.getByLabel('ИНЗ / номер заявки *')).toHaveValue('942476082');
+  await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue('942476084');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
-  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/1236514265/);
-
-  await page.getByRole('button', { name: 'Назад к обращениям' }).click();
-  await expect(page.getByRole('heading', { name: 'Обращения', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/4236514265/);
+  await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/нет маппинга теста/i);
 });
 
 test('PРИИЗ: полный путь ДКП → Инициатор → Инженер → подтверждение → закрытие', async ({ page }) => {
@@ -49,6 +66,13 @@ test('PРИИЗ: полный путь ДКП → Инициатор → Инж�
 
   await page.getByRole('button', { name: 'Создать обращение', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: 'Не получен результат' })).toBeVisible();
+  await expect(page.getByLabel('Клиент *')).toHaveAttribute('readonly', '');
+  await expect(page.getByLabel('Код клиента *')).toHaveAttribute('readonly', '');
+  await expect(page.getByLabel('Клиент *')).not.toHaveValue('');
+  await expect(page.getByLabel('Код клиента *')).not.toHaveValue('');
+  await page.getByLabel('ИНЗ / номер заявки *').fill('INZ-QA-001');
+  await page.getByLabel('Вендор / интеграция').fill('QA интеграция');
+  await page.getByLabel('Описание проблемы *').fill('DEMO: результат не получен');
   await page.getByRole('button', { name: 'Создать обращение', exact: true }).click();
   const incidentId = (await page.locator('h1').filter({ hasText: /^PRIIZ-/ }).textContent())?.trim();
   expect(incidentId).toMatch(/^PRIIZ-\d{6}$/);

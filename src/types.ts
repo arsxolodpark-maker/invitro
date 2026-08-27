@@ -9,6 +9,7 @@ export type IncidentStatus = 'Новое' | 'В работе' | 'Отложен�
 export type IntegrationType = 'типовая' | 'кастомная';
 export type ProblemScope = 'единичная' | 'несколько' | 'массовая' | 'неизвестно';
 export type WorkedBefore = 'да' | 'нет' | 'неизвестно';
+export type GovinIssueClass = 'SERVICE_MAPPING' | 'TEST_MAPPING' | 'DATABASE_NOT_FOUND';
 
 export interface IncidentPrefill {
   source: 'GOVIN-303';
@@ -19,6 +20,12 @@ export interface IncidentPrefill {
   inz?: string;
   description?: string;
   contextLabel?: string;
+  incidentTitle?: string;
+  issueClass?: GovinIssueClass;
+  processStage?: string;
+  externalDirectionId?: string;
+  barcode?: string;
+  recommendedRoute?: string;
 }
 
 export interface DiagnosticStage {
@@ -60,7 +67,13 @@ export interface AttachmentMeta {
 export interface Incident {
   id: string;
   incidentType: IncidentType;
+  title?: string;
   source: string;
+  govinIssueClass?: GovinIssueClass;
+  processStage?: string;
+  externalDirectionId?: string;
+  barcode?: string;
+  recommendedRoute?: string;
   createdAt: string;
   createdBy: string;
   initiatorEmail?: string;

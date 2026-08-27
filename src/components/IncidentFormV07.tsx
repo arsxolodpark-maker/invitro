@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ArrowLeft, CheckCircle2, Info, Send, Waypoints } from 'lucide-react';
 import { Incident, IncidentPrefill, UserRole } from '../types';
 import { getInitiatorSession, getLatestInitiator } from '../services/users';
+import { ActionHint } from './ActionHint';
 
 interface Props {
   currentRole: UserRole;
@@ -13,26 +14,35 @@ interface Props {
 export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack, onSubmit }) => {
   const initiator = useMemo(() => getInitiatorSession() || getLatestInitiator(), []);
   const isExternal = currentRole === 'Инициатор';
-  const [client, setClient] = useState(prefill?.client || (isExternal ? initiator.organization : 'ООО «Демо-клиент»'));
-  const [clientCode, setClientCode] = useState(prefill?.clientCode || (isExternal ? initiator.clientCode : 'CLI-DEMO-01'));
-  const [lpu, setLpu] = useState(prefill?.lpu || 'Подразделение клиента · DEMO');
-  const [inz, setInz] = useState(prefill?.inz || '998877665');
-  const [vendor, setVendor] = useState(prefill?.vendor || 'Вендор МИС · DEMO');
+  const fromGovin = prefill?.source === 'GOVIN-303';
+  const formTitle = fromGovin ? (prefill?.incidentTitle || 'Инцидент GOVIN') : 'Не получен результат';
+  const [client, setClient] = useState(fromGovin ? (prefill?.client ?? '') : (prefill?.client || (isExternal ? initiator.organization : 'ООО «Демо-клиент»')));
+  const [clientCode, setClientCode] = useState(fromGovin ? (prefill?.clientCode ?? '') : (prefill?.clientCode || (isExternal ? initiator.clientCode : 'CLI-DEMO-01')));
+  const [lpu, setLpu] = useState(fromGovin ? (prefill?.lpu ?? '') : (prefill?.lpu || 'Подразделение клиента · DEMO'));
+  const [inz, setInz] = useState(fromGovin ? (prefill?.inz ?? '') : (prefill?.inz || '998877665'));
+  const [vendor, setVendor] = useState(fromGovin ? (prefill?.vendor ?? '') : (prefill?.vendor || 'Вендор МИС · DEMO'));
   const [description, setDescription] = useState(prefill?.description || 'DEMO: результат исследования не отображается в системе клиента.');
   const [vendorContacted, setVendorContacted] = useState(false);
   const [vendorAnswer, setVendorAnswer] = useState('');
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!client.trim() || !clientCode.trim() || !inz.trim() || !description.trim()) return;
+    if (!description.trim()) return;
+    if (!fromGovin && (!client.trim() || !clientCode.trim() || !inz.trim())) return;
     onSubmit({
-      incidentType: 'INC-02',
+      incidentType: fromGovin ? 'OTHER' : 'INC-02',
+      title: formTitle,
       source: prefill?.source || 'ПРИИЗ Portal',
+      govinIssueClass: fromGovin ? prefill?.issueClass : undefined,
+      processStage: fromGovin ? prefill?.processStage : undefined,
+      externalDirectionId: fromGovin ? prefill?.externalDirectionId : undefined,
+      barcode: fromGovin ? prefill?.barcode : undefined,
+      recommendedRoute: fromGovin ? prefill?.recommendedRoute : undefined,
       createdBy: isExternal ? `${initiator.secondName} ${initiator.firstName}` : `Пользователь (${currentRole})`,
       initiatorEmail: isExternal ? initiator.email : undefined,
       authorRole: currentRole,
       priority: 'Высокий',
-      responsibleTeam: 'Инженер ГСТИ',
+      responsibleTeam: fromGovin ? (prefill?.recommendedRoute || 'Маршрут требует уточнения') : 'Инженер ГСТИ',
       client: client.trim(),
       clientCode: clientCode.trim(),
       lpu: lpu.trim(),
@@ -47,7 +57,7 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack,
       vendorContacted,
       vendorAnswer: vendorContacted ? vendorAnswer.trim() : undefined,
       attachments: [],
-      fullDataOnFirstSubmit: true,
+      fullDataOnFirstSubmit: fromGovin ? Boolean(client.trim() && clientCode.trim() && description.trim()) : true,
       clarificationCount: 0,
       slaStatus: 'В норме (демо)',
     });
@@ -57,30 +67,44 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack,
 
   return (
     <div className="max-w-3xl mx-auto py-4 pb-16 space-y-5 notranslate" translate="no">
-      <button type="button" onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />Назад к обращениям</button>
+      {fromGovin ? (
+        <ActionHint text="Вернёт к той же проверке направления без потери текущего GOVIN-контекста.">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />Назад в GOVIN</button>
+        </ActionHint>
+      ) : (
+        <button type="button" onClick={onBack} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600"><ArrowLeft className="w-4 h-4" />Назад к обращениям</button>
+      )}
       <div className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs">
-        <div className="flex items-center gap-2 flex-wrap"><span className="text-xs font-bold px-2.5 py-1 rounded bg-[#e9f8f8] text-[#007f89]">INC-02</span><h1 className="text-xl font-extrabold text-[#17383d]">Не получен результат</h1></div>
-        <p className="text-sm text-slate-500 mt-2">Заполните данные, которые нужны для начала обработки обращения.</p>
+        <div className="flex items-center gap-2 flex-wrap"><span className="text-xs font-bold px-2.5 py-1 rounded bg-[#e9f8f8] text-[#007f89]">{fromGovin ? 'GOVIN → ПРИИЗ' : 'INC-02'}</span><h1 className="text-xl font-extrabold text-[#17383d]">{formTitle}</h1></div>
+        <p className="text-sm text-slate-500 mt-2">{fromGovin ? 'Контекст проблемы перенесён из проверки направления. Проверьте доступные данные перед созданием обращения.' : 'Заполните данные, которые нужны для начала обработки обращения.'}</p>
       </div>
 
-      {prefill?.source === 'GOVIN-303' && <div className="rounded-xl border border-[#bce8e8] bg-[#eefafa] p-4 flex items-start gap-3 text-sm text-slate-700"><Waypoints className="w-5 h-5 text-[#0099a8] shrink-0 mt-0.5"/><div><strong className="text-[#17383d]">Данные перенесены из «Проверки направления».</strong><div className="text-xs mt-1 text-slate-600">{prefill.contextLabel || 'Контекст направления'} · проверьте данные перед отправкой.</div></div></div>}
+      {fromGovin && <div className="rounded-xl border border-[#bce8e8] bg-[#eefafa] p-4 flex items-start gap-3 text-sm text-slate-700"><Waypoints className="w-5 h-5 text-[#0099a8] shrink-0 mt-0.5"/><div><strong className="text-[#17383d]">Данные перенесены из «Проверки направления».</strong><div className="text-xs mt-1 text-slate-600">{prefill?.contextLabel || 'Контекст направления'} · передаются только фактически известные GOVIN поля.</div>{prefill?.processStage && <div className="text-xs mt-1"><strong>Этап:</strong> {prefill.processStage}</div>}{prefill?.recommendedRoute && <div className="text-xs mt-1"><strong>Маршрут:</strong> {prefill.recommendedRoute}</div>}</div></div>}
 
       <form onSubmit={submit} className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs space-y-5">
         {isExternal && <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600"><strong>Профиль:</strong> {initiator.email} · {initiator.organization}. Организация и код клиента уже заполнены.</div>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label><span className="text-xs font-bold text-slate-700">Клиент *</span><input required value={client} readOnly={isExternal} onChange={(e) => setClient(e.target.value)} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
-          <label><span className="text-xs font-bold text-slate-700">Код клиента *</span><input required value={clientCode} readOnly={isExternal} onChange={(e) => setClientCode(e.target.value)} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
-          <label><span className="text-xs font-bold text-slate-700">ЛПУ / подразделение</span><input value={lpu} onChange={(e) => setLpu(e.target.value)} className={common} /></label>
-          <label><span className="text-xs font-bold text-slate-700">ИНЗ / номер заявки *</span><input required value={inz} onChange={(e) => setInz(e.target.value)} className={common} /></label>
-          <label className="md:col-span-2"><span className="text-xs font-bold text-slate-700">Вендор / интеграция</span><input value={vendor} onChange={(e) => setVendor(e.target.value)} className={common} /></label>
+          <label><span className="text-xs font-bold text-slate-700">Клиент{!fromGovin ? ' *' : ''}</span><input required={!fromGovin} value={client} readOnly={isExternal} onChange={(e) => setClient(e.target.value)} placeholder={fromGovin && !client ? 'Нет данных GOVIN / дополните при наличии' : undefined} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
+          <label><span className="text-xs font-bold text-slate-700">Код клиента{!fromGovin ? ' *' : ''}</span><input required={!fromGovin} value={clientCode} readOnly={isExternal} onChange={(e) => setClientCode(e.target.value)} placeholder={fromGovin && !clientCode ? 'Нет данных GOVIN / дополните при наличии' : undefined} className={`${common} ${isExternal ? 'bg-[#f6fafa] text-slate-600' : ''}`} /></label>
+          <label><span className="text-xs font-bold text-slate-700">ЛПУ / подразделение</span><input value={lpu} onChange={(e) => setLpu(e.target.value)} placeholder={fromGovin && !lpu ? 'Нет данных GOVIN' : undefined} className={common} /></label>
+          <label><span className="text-xs font-bold text-slate-700">ИНЗ / номер заявки{!fromGovin ? ' *' : ''}</span><input required={!fromGovin} value={inz} onChange={(e) => setInz(e.target.value)} placeholder={fromGovin && !inz ? 'Не присвоен / нет данных на текущем этапе' : undefined} className={common} /></label>
+          <label className="md:col-span-2"><span className="text-xs font-bold text-slate-700">Вендор / интеграция</span><input value={vendor} onChange={(e) => setVendor(e.target.value)} placeholder={fromGovin && !vendor ? 'Нет данных GOVIN' : undefined} className={common} /></label>
           <label className="md:col-span-2"><span className="text-xs font-bold text-slate-700">Описание проблемы *</span><textarea required value={description} onChange={(e) => setDescription(e.target.value)} className={`${common} min-h-24`} /></label>
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={vendorContacted} onChange={(e) => setVendorContacted(e.target.checked)} />Уже обращались к вендору</label>
         {vendorContacted && <textarea value={vendorAnswer} onChange={(e) => setVendorAnswer(e.target.value)} placeholder="Кратко укажите ответ вендора" className={`${common} min-h-20`} />}
-        <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600 flex gap-2"><Info className="w-4 h-4 text-[#0099a8] shrink-0" /><span>После создания обращение будет связано с 1C:ITILIUM, а его статус появится в ПРИИЗ.</span></div>
-        <div className="flex justify-end"><button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button></div>
+        <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600 flex gap-2"><Info className="w-4 h-4 text-[#0099a8] shrink-0" /><span>{fromGovin ? 'После создания ПРИИЗ должен вернуть номер и статус обращения. Промышленный контракт этой связи остаётся TBD.' : 'После создания обращение будет связано с 1C:ITILIUM, а его статус появится в ПРИИЗ.'}</span></div>
+        <div className="flex justify-end">
+          {fromGovin ? (
+            <ActionHint text="После подтверждения ПРИИЗ создаст обращение. В целевом процессе вы получите номер и текущий статус обращения.">
+              <button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button>
+            </ActionHint>
+          ) : (
+            <button type="submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0099a8] text-white font-bold text-sm"><Send className="w-4 h-4" />Создать обращение</button>
+          )}
+        </div>
       </form>
-      {!isExternal && <div className="flex items-center gap-2 text-xs text-emerald-700"><CheckCircle2 className="w-4 h-4" />Инженерная обработка выполняется в контуре 1C:ITILIUM.</div>}
+      {!isExternal && !fromGovin && <div className="flex items-center gap-2 text-xs text-emerald-700"><CheckCircle2 className="w-4 h-4" />Инженерная обработка выполняется в контуре 1C:ITILIUM.</div>}
     </div>
   );
 };

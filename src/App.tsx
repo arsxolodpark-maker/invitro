@@ -31,94 +31,44 @@ export default function App() {
   const refreshIncidents = () => setIncidents(getIncidents());
 
   const handleRoleChange = (newRole: UserRole) => {
-    setCurrentRole(newRole);
-    setSelectedIncidentId(null);
-    setConsoleInz(null);
-    setIncidentPrefill(null);
+    setCurrentRole(newRole); setSelectedIncidentId(null); setConsoleInz(null); setIncidentPrefill(null);
     setActiveView(newRole === 'Администратор' ? 'admin' : newRole === 'Project' ? 'analytics' : 'home');
   };
-
   const handleNavigate = (view: 'home' | 'direction-check' | 'initiators' | 'analytics' | 'knowledge' | 'admin') => {
-    setActiveView(view);
-    setSelectedIncidentId(null);
-    setIncidentPrefill(null);
+    setActiveView(view); setSelectedIncidentId(null); setIncidentPrefill(null);
   };
-
-  const handleStartCreateIncident = (prefill?: IncidentPrefill) => {
-    setIncidentPrefill(prefill || null);
-    setActiveView('form');
-  };
-
+  const handleStartCreateIncident = (prefill?: IncidentPrefill) => { setIncidentPrefill(prefill || null); setActiveView('form'); };
   const handleCreateSubmit = (data: Omit<Incident, 'id' | 'createdAt' | 'comments' | 'status' | 'internalServiceDeskId'>) => {
-    const created = createIncident(data);
-    refreshIncidents();
-    setIncidentPrefill(null);
-    setSelectedIncidentId(created.id);
-    setActiveView('detail');
-    // DEMO 1C:ITILIUM adapter finishes asynchronously. Refresh once more so the generated
-    // Service Desk number appears without requiring the user to navigate away and back.
-    window.setTimeout(refreshIncidents, 450);
+    const created = createIncident(data); refreshIncidents(); setIncidentPrefill(null); setSelectedIncidentId(created.id); setActiveView('detail'); window.setTimeout(refreshIncidents, 450);
   };
-
   const handleSelectIncident = (id: string) => { setSelectedIncidentId(id); setActiveView('detail'); };
-  const handleAddComment = (id: string, text: string) => {
-    addIncidentComment(id, currentRole === 'Инженер ГСТИ' ? 'Инженер ГСТИ · DEMO' : currentRole === 'Инициатор' ? 'Инициатор · DEMO' : `Пользователь (${currentRole})`, currentRole, text);
-    refreshIncidents();
-  };
-  const handleConfirmReceipt = (id: string) => {
-    confirmResultReceipt(id, 'Инициатор · DEMO', currentRole);
-    refreshIncidents();
-  };
-  const handleCloseIncident = (id: string, rootCause: string, resolution: string) => {
-    closeIncident(id, 'Инженер ГСТИ · DEMO', rootCause, resolution);
-    refreshIncidents();
-  };
-  const handleStatusChange = (id: string, status: IncidentStatus) => {
-    updateIncidentStatus(id, status);
-    refreshIncidents();
-  };
-
+  const handleAddComment = (id: string, text: string) => { addIncidentComment(id, currentRole === 'Инженер ГСТИ' ? 'Инженер ГСТИ · DEMO' : currentRole === 'Инициатор' ? 'Инициатор · DEMO' : `Пользователь (${currentRole})`, currentRole, text); refreshIncidents(); };
+  const handleConfirmReceipt = (id: string) => { confirmResultReceipt(id, 'Инициатор · DEMO', currentRole); refreshIncidents(); };
+  const handleCloseIncident = (id: string, rootCause: string, resolution: string) => { closeIncident(id, 'Инженер ГСТИ · DEMO', rootCause, resolution); refreshIncidents(); };
+  const handleStatusChange = (id: string, status: IncidentStatus) => { updateIncidentStatus(id, status); refreshIncidents(); };
   const handleResetDemoData = () => {
     if (window.confirm('Сбросить обращения, пользователей и изменения контрольного сценария к исходным DEMO-данным?')) {
-      resetDemoData();
-      resetInitiators();
-      refreshIncidents();
-      setIncidentPrefill(null);
-      setActiveView(currentRole === 'Администратор' ? 'admin' : currentRole === 'Project' ? 'analytics' : 'home');
-      setSelectedIncidentId(null);
-      window.location.reload();
+      resetDemoData(); resetInitiators(); refreshIncidents(); setIncidentPrefill(null); setActiveView(currentRole === 'Администратор' ? 'admin' : currentRole === 'Project' ? 'analytics' : 'home'); setSelectedIncidentId(null); window.location.reload();
     }
   };
 
   const selectedIncident = selectedIncidentId ? getIncidentById(selectedIncidentId) : null;
-  const isAdmin = currentRole === 'Администратор';
-  const isInitiator = currentRole === 'Инициатор';
-  const isEngineer = currentRole === 'Инженер ГСТИ';
+  const isAdmin = currentRole === 'Администратор'; const isInitiator = currentRole === 'Инициатор'; const isEngineer = currentRole === 'Инженер ГСТИ';
 
-  return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col notranslate" translate="no">
-      <Header currentRole={currentRole} onRoleChange={handleRoleChange} activeView={activeView} onNavigate={handleNavigate} onResetData={handleResetDemoData} />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5">
-        {activeView === 'home' && isInitiator && <InitiatorPortalView incidents={incidents} onCreateIncident={() => handleStartCreateIncident()} onSelectIncident={handleSelectIncident} />}
-        {activeView === 'home' && !isInitiator && !isAdmin && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={() => handleStartCreateIncident()} onSelectIncident={handleSelectIncident} />}
-        {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
-        {activeView === 'initiators' && currentRole === 'ДКП' && <DkpInitiatorsView />}
-        {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} prefill={incidentPrefill || undefined} onBack={() => { setIncidentPrefill(null); setActiveView('home'); }} onSubmit={handleCreateSubmit} />}
-        {activeView === 'detail' && selectedIncident && !isAdmin && <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} onStatusChange={handleStatusChange} />}
-        {activeView === 'analytics' && currentRole === 'Project' && <AnalyticsView />}
-        {activeView === 'knowledge' && !isInitiator && !isAdmin && <KnowledgeBaseView />}
-        {activeView === 'admin' && isAdmin && <AdminView />}
-      </main>
-
-      {consoleInz && isEngineer && <IntegrationConsoleModal inz={consoleInz} onClose={() => setConsoleInz(null)} />}
-
-      <footer className="bg-white border-t border-[#dfeaea] py-3 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-          <div className="flex items-center space-x-2"><span className="font-bold text-[#17383d]">ПРИИЗ v0.7.2</span><span>•</span><span>release candidate</span></div>
-          <div className="text-slate-400 text-[11px]">Все данные вымышлены. Реальные API, медицинские данные и ПДн не используются.</div>
-        </div>
-      </footer>
-    </div>
-  );
+  return <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col notranslate" translate="no">
+    <Header currentRole={currentRole} onRoleChange={handleRoleChange} activeView={activeView} onNavigate={handleNavigate} onResetData={handleResetDemoData} />
+    <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      {activeView === 'home' && isInitiator && <InitiatorPortalView incidents={incidents} onCreateIncident={() => handleStartCreateIncident()} onSelectIncident={handleSelectIncident} />}
+      {activeView === 'home' && !isInitiator && !isAdmin && <MainDashboard incidents={incidents} currentRole={currentRole} onCreateIncident={() => handleStartCreateIncident()} onSelectIncident={handleSelectIncident} />}
+      {activeView === 'direction-check' && currentRole === 'ДКП' && <DirectionCheckView onCreateIncident={handleStartCreateIncident} />}
+      {activeView === 'initiators' && currentRole === 'ДКП' && <DkpInitiatorsView />}
+      {activeView === 'form' && !isAdmin && <IncidentFormV07 currentRole={currentRole} prefill={incidentPrefill || undefined} onBack={() => { const fromGovin = incidentPrefill?.source === 'GOVIN-303'; setIncidentPrefill(null); setActiveView(fromGovin ? 'direction-check' : 'home'); }} onSubmit={handleCreateSubmit} />}
+      {activeView === 'detail' && selectedIncident && !isAdmin && <IncidentDetailCard incident={selectedIncident} currentRole={currentRole} onBack={() => setActiveView('home')} onOpenConsole={(inz) => setConsoleInz(inz)} onAddComment={handleAddComment} onConfirmReceipt={handleConfirmReceipt} onCloseIncident={handleCloseIncident} onStatusChange={handleStatusChange} />}
+      {activeView === 'analytics' && currentRole === 'Project' && <AnalyticsView />}
+      {activeView === 'knowledge' && !isInitiator && !isAdmin && <KnowledgeBaseView />}
+      {activeView === 'admin' && isAdmin && <AdminView />}
+    </main>
+    {consoleInz && isEngineer && <IntegrationConsoleModal inz={consoleInz} onClose={() => setConsoleInz(null)} />}
+    <footer className="bg-white border-t border-[#dfeaea] py-3 mt-auto"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2"><div className="flex items-center space-x-2"><span className="font-bold text-[#17383d]">ПРИИЗ v0.7.2</span><span>•</span><span>release candidate</span></div><div className="text-slate-400 text-[11px]">Все данные вымышлены. Реальные API, медицинские данные и ПДн не используются.</div></div></footer>
+  </div>;
 }
