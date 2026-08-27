@@ -15,37 +15,40 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: GOVIN v0.5.9 - search-first, три бизнес-этапа и перенос контекста в ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.6.0 - итог и действие первичны, детали вторичны, контекст уходит в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
-  await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toHaveCount(0);
-  await expect(page.getByRole('region', { name: 'Этапы проверки' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Детали проверки' })).toHaveCount(0);
 
   await page.getByLabel('Интеграция').selectOption('Нетрика');
   await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
-  await expect(page.getByText('DIR-DEMO-001')).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button')).toHaveCount(3);
-  await expect(page.getByText('Сводка маппинга')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Итог и следующее действие' }).getByRole('heading', { name: 'С направлением всё в порядке' })).toBeVisible();
+  await expect(page.getByText('DIR-DEMO-001')).toHaveCount(0);
   await expect(page.getByText('Создать обращение в ПРИИЗ')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Проверить другое направление/ })).toBeVisible();
 
   await page.getByLabel('Интеграция').selectOption('Нетрика');
   await page.getByLabel('Номер направления / штрихкод').fill('4236514265');
   await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
-  await expect(page.getByText('NMU-T05')).toBeVisible();
-  await expect(page.getByText('Доставка отменена', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
-  await expect(page.getByText(/ГСТИ, если интеграция в поддержке/).first()).toBeVisible();
-  await page.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
+  const outcome = page.getByRole('region', { name: 'Итог и следующее действие' });
+  await expect(outcome.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
+  await expect(outcome.getByText(/повторно инициировать отправку результата/)).toBeVisible();
+  await expect(outcome.getByText(/ГСТИ, если интеграция в поддержке/)).toBeVisible();
+  await expect(page.getByText('NMU-T05')).toHaveCount(0);
 
+  await page.getByRole('button', { name: /Показать детали проверки/ }).click();
+  await expect(page.getByText('Не доставлены — доставка отменена')).toBeVisible();
+  await page.getByRole('button', { name: /Показать маппинг/ }).click();
+  await expect(page.getByText('NMU-T05')).toBeVisible();
+
+  await outcome.getByRole('button', { name: 'Создать обращение в ПРИИЗ' }).click();
   await expect(page.getByRole('heading', { name: 'Ошибка доставки результатов' })).toBeVisible();
   await expect(page.getByText('Данные перенесены из «Проверки направления».')).toBeVisible();
   await expect(page.getByLabel('ИНЗ / номер заявки')).toHaveValue('942476084');
   await expect(page.getByLabel('Вендор / интеграция')).toHaveValue('Нетрика');
   await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/4236514265/);
   await expect(page.getByLabel('Описание проблемы *')).toHaveValue(/нет маппинга теста/i);
-  await expect(page.getByText(/Доставка результатов/).first()).toBeVisible();
 });
 
 test('PРИИЗ: полный путь ДКП → Инициатор → Инженер → подтверждение → закрытие', async ({ page }) => {
