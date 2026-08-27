@@ -12,14 +12,26 @@
   --invitro-muted: #62767a;
 }
 
-html { background: var(--invitro-teal-pale); }
-body {
+html {
+  background: var(--invitro-teal-pale);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body,
+#root {
   margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
   background: #f5f8f8;
   color: var(--invitro-ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
 ::selection { background: #cceeee; color: #15383d; }
 
 /* Shared INVITRO-inspired bridge for the demo portal. */
@@ -30,119 +42,88 @@ body {
 .bg-blue-50\/50 { background-color: rgba(232,248,248,.74) !important; }
 .bg-blue-500\/20 { background-color: rgba(0,166,173,.18) !important; }
 .bg-blue-950\/40 { background-color: rgba(0,74,81,.38) !important; }
-.text-blue-900 { color: #005c64 !important; }.text-blue-800 { color: #006e77 !important; }.text-blue-700 { color: var(--invitro-teal-dark) !important; }.text-blue-600 { color: var(--invitro-teal) !important; }.text-blue-400 { color: #36bac3 !important; }.text-blue-300 { color: #7fd5da !important; }.text-blue-200 { color: #b7e8e9 !important; }
-.border-blue-600 { border-color: var(--invitro-teal) !important; }.border-blue-500\/30 { border-color: rgba(0,166,173,.32) !important; }.border-blue-400\/30 { border-color: rgba(0,166,173,.28) !important; }.border-blue-300 { border-color: #9cd6d8 !important; }.border-blue-200 { border-color: #b9e3e4 !important; }.border-blue-100 { border-color: #d3eeee !important; }.border-blue-900\/50 { border-color: rgba(0,104,113,.48) !important; }
-.ring-blue-100 { --tw-ring-color: rgba(0,166,173,.16) !important; }.ring-blue-500 { --tw-ring-color: rgba(0,166,173,.34) !important; }.focus\:ring-blue-500:focus { --tw-ring-color: rgba(0,166,173,.34) !important; }
-.hover\:bg-blue-500:hover { background-color: #008f96 !important; }.hover\:bg-blue-600:hover { background-color: var(--invitro-teal-dark) !important; }.hover\:bg-blue-50:hover { background-color: #e4f6f6 !important; }.hover\:bg-blue-50\/40:hover { background-color: rgba(233,248,248,.72) !important; }.hover\:text-blue-600:hover { color: var(--invitro-teal) !important; }.hover\:text-blue-800:hover { color: var(--invitro-teal-deep) !important; }
-.bg-indigo-100,.bg-purple-100{background-color:#e3f5f5!important}.bg-indigo-50,.bg-purple-50{background-color:#f0fafa!important}.text-indigo-800,.text-purple-800{color:#176f77!important}.text-indigo-700,.text-purple-700{color:#247b83!important}.text-indigo-600,.text-purple-600{color:#2a9098!important}.border-indigo-200,.border-purple-200{border-color:#c9e7e8!important}
-.shadow-2xs,.shadow-xs,.shadow-sm{box-shadow:0 3px 14px rgba(24,74,79,.045)!important}
-.bg-slate-100{background-color:#f2f6f6!important}.bg-slate-50{background-color:#f7f9f9!important}.bg-slate-50\/60{background-color:rgba(247,249,249,.72)!important}.bg-slate-50\/80{background-color:rgba(247,249,249,.9)!important}.border-slate-200{border-color:#dfe7e7!important}.border-slate-100{border-color:#edf1f1!important}.text-slate-900{color:#17383d!important}.text-slate-800{color:#23474c!important}.text-slate-700{color:#36575b!important}.text-slate-600{color:#536c70!important}.text-slate-500{color:#6c7f82!important}
-input,select,textarea,button{font:inherit}input,select,textarea{transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}input:focus,select:focus,textarea:focus{border-color:rgba(0,166,173,.62)!important;box-shadow:0 0 0 3px rgba(0,166,173,.09)}
-table thead tr{background-color:#f4f8f8}table tbody tr{transition:background-color .15s ease}table tbody tr:hover{background-color:rgba(232,248,248,.42)}
+.text-blue-900 { color: #005c64 !important; }
+.text-blue-800 { color: #006e77 !important; }
+.text-blue-700 { color: var(--invitro-teal-dark) !important; }
+.text-blue-600 { color: var(--invitro-teal) !important; }
+.text-blue-400 { color: #36bac3 !important; }
+.text-blue-300 { color: #7fd5da !important; }
+.text-blue-200 { color: #b7e8e9 !important; }
+.border-blue-600 { border-color: var(--invitro-teal) !important; }
+.border-blue-500\/30 { border-color: rgba(0,166,173,.32) !important; }
+.border-blue-400\/30 { border-color: rgba(0,166,173,.28) !important; }
+.border-blue-300 { border-color: #9cd6d8 !important; }
+.border-blue-200 { border-color: #b9e3e4 !important; }
+.border-blue-100 { border-color: #d3eeee !important; }
+.border-blue-900\/50 { border-color: rgba(0,104,113,.48) !important; }
+.ring-blue-100 { --tw-ring-color: rgba(0,166,173,.16) !important; }
+.ring-blue-500 { --tw-ring-color: rgba(0,166,173,.34) !important; }
+.focus\:ring-blue-500:focus { --tw-ring-color: rgba(0,166,173,.34) !important; }
+.hover\:bg-blue-500:hover { background-color: #008f96 !important; }
+.hover\:bg-blue-600:hover { background-color: var(--invitro-teal-dark) !important; }
+.hover\:bg-blue-50:hover { background-color: #e4f6f6 !important; }
+.hover\:bg-blue-50\/40:hover { background-color: rgba(233,248,248,.72) !important; }
+.hover\:text-blue-600:hover { color: var(--invitro-teal) !important; }
+.hover\:text-blue-800:hover { color: var(--invitro-teal-deep) !important; }
+.bg-indigo-100,.bg-purple-100 { background-color:#e3f5f5!important; }
+.bg-indigo-50,.bg-purple-50 { background-color:#f0fafa!important; }
+.text-indigo-800,.text-purple-800 { color:#176f77!important; }
+.text-indigo-700,.text-purple-700 { color:#247b83!important; }
+.text-indigo-600,.text-purple-600 { color:#2a9098!important; }
+.border-indigo-200,.border-purple-200 { border-color:#c9e7e8!important; }
+.shadow-2xs,.shadow-xs,.shadow-sm { box-shadow:0 3px 14px rgba(24,74,79,.045)!important; }
+.bg-slate-100 { background-color:#f2f6f6!important; }
+.bg-slate-50 { background-color:#f7f9f9!important; }
+.bg-slate-50\/60 { background-color:rgba(247,249,249,.72)!important; }
+.bg-slate-50\/80 { background-color:rgba(247,249,249,.9)!important; }
+.border-slate-200 { border-color:#dfe7e7!important; }
+.border-slate-100 { border-color:#edf1f1!important; }
+.text-slate-900 { color:#17383d!important; }
+.text-slate-800 { color:#23474c!important; }
+.text-slate-700 { color:#36575b!important; }
+.text-slate-600 { color:#536c70!important; }
+.text-slate-500 { color:#6c7f82!important; }
 
-/* GOVIN workstation skin. The root of DirectionCheckView carries .notranslate. */
-.notranslate {
-  max-width: 1240px !important;
-  gap: 10px !important;
-  padding-top: 4px !important;
+input,select,textarea,button { font:inherit; }
+input,select,textarea { transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease; }
+input:focus,select:focus,textarea:focus { border-color:rgba(0,166,173,.62)!important;box-shadow:0 0 0 3px rgba(0,166,173,.09); }
+table thead tr { background-color:#f4f8f8; }
+table tbody tr { transition:background-color .15s ease; }
+table tbody tr:hover { background-color:rgba(232,248,248,.42); }
+
+/* v0.6.0 responsive guards: technical values must wrap inside their own cells. */
+[aria-label="Данные направления"] dl > div,
+[aria-label="Этапы проверки"] button,
+[aria-label="Этапы проверки"] [id^="stage-detail-"] > div > div {
+  min-width: 0;
 }
-.notranslate > div:first-child {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-rows: auto auto;
-  align-items: center;
-  gap: 2px 14px;
-  padding: 12px 16px 11px 20px !important;
-  border-radius: 12px !important;
-  border-color: #d9e5e5 !important;
-  box-shadow: none !important;
-  overflow: hidden;
+
+[aria-label="Данные направления"] dd,
+[aria-label="Этапы проверки"] [id^="stage-detail-"] {
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
-.notranslate > div:first-child::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  background: var(--invitro-teal);
+
+[aria-label="Этапы проверки"] [id^="stage-detail-"] > div {
+  align-items: start;
 }
-.notranslate > div:first-child > div:first-child {
-  grid-column: 3;
-  grid-row: 1;
-  margin: 0 !important;
-  padding: 5px 8px;
-  border-radius: 7px;
-  background: var(--invitro-teal-soft);
-  color: var(--invitro-teal-deep) !important;
-  letter-spacing: .06em !important;
-  white-space: nowrap;
-}
-.notranslate > div:first-child > h1 {
-  grid-column: 1 / 3;
-  grid-row: 1;
-  margin: 0 !important;
-  font-size: 21px !important;
-  letter-spacing: -.015em;
-}
-.notranslate > div:first-child > p {
-  grid-column: 1 / 4;
-  grid-row: 2;
-  margin-top: 2px !important;
-  font-size: 12px !important;
-}
-.notranslate > div:nth-child(2) {
-  padding: 13px 16px 10px !important;
-  border-radius: 12px !important;
-  border-color: #d9e5e5 !important;
-  box-shadow: none !important;
-}
-.notranslate > div:nth-child(2) select,
-.notranslate > div:nth-child(2) input {
-  height: 40px !important;
-  border-radius: 8px !important;
-  background: #fff !important;
-  border-color: #cfdcdc !important;
-}
-.notranslate > div:nth-child(2) button[class*="bg-[#0099a8]"] {
-  height: 40px !important;
-  border-radius: 8px !important;
-  background: var(--invitro-teal) !important;
-  box-shadow: none !important;
-}
-.notranslate > div:nth-child(2) button[class*="bg-[#0099a8]"]:hover { background: var(--invitro-teal-dark) !important; }
-.notranslate > div:nth-child(2) > div:last-child {
-  margin-top: 8px !important;
-  padding-top: 7px !important;
-}
-.notranslate > div:nth-child(2) > div:last-child > button {
-  font-weight: 650 !important;
-  color: #809093 !important;
-}
-.notranslate section,
-.notranslate > div[class*="rounded-2xl"] {
-  border-radius: 12px !important;
-}
-.notranslate section[aria-label="Данные направления"],
-.notranslate section[aria-label="Этапы проверки"] {
-  box-shadow: none !important;
-}
-.notranslate section[aria-label="Этапы проверки"] button {
-  border-radius: 9px !important;
-}
-.notranslate table th { color: #607477; font-weight: 750; }
 
 @media (max-width: 767px) {
-  .notranslate { padding-inline: 4px !important; }
-  .notranslate > div:first-child {
-    grid-template-columns: 1fr auto;
-    padding: 11px 12px 10px 16px !important;
+  [aria-label="Итог и следующее действие"] h2,
+  [aria-label="Итог и следующее действие"] p,
+  [aria-label="Данные направления"] dd,
+  [aria-label="Этапы проверки"] button,
+  [aria-label="Этапы проверки"] [id^="stage-detail-"] {
+    max-width: 100%;
   }
-  .notranslate > div:first-child > h1 { grid-column: 1 / 3; grid-row: 2; font-size: 19px !important; margin-top: 4px !important; }
-  .notranslate > div:first-child > div:first-child { grid-column: 2; grid-row: 1; font-size: 9px !important; }
-  .notranslate > div:first-child > p { grid-column: 1 / 3; grid-row: 3; }
-  .notranslate > div:nth-child(2) { padding: 12px !important; }
+
+  [aria-label="Проверка направления"] button,
+  [aria-label="Итог и следующее действие"] button {
+    white-space: normal;
+  }
 }
 
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-.animate-fade-in{animation:fadeIn .2s ease-out forwards}.animate-scale-in{animation:scaleIn .15s ease-out forwards}
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+@keyframes scaleIn { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
+.animate-fade-in { animation:fadeIn .2s ease-out forwards; }
+.animate-scale-in { animation:scaleIn .15s ease-out forwards; }
