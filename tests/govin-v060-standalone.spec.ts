@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const scenarios = ['S1', 'S2', 'S3', 'S4', 'S5'] as const;
-const standaloneUrl = (scenario: string) => `http://127.0.0.1:3000/govin-v060/?scenario=${scenario}`;
+const standaloneUrl = (scenario: string) => `http://127.0.0.1:3000/invitro/govin-v060/index.html?scenario=${scenario}`;
 
 async function expectNoOverflow(page: import('@playwright/test').Page) {
   const { clientWidth, scrollWidth } = await page.evaluate(() => ({
