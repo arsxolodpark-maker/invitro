@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, Search, Waypoints } from 'lucide-react';
+import { AlertTriangle, BellRing, ChevronDown, ChevronUp, Search, Waypoints } from 'lucide-react';
 import { IncidentPrefill } from '../types';
 
 interface DirectionCheckViewProps {
@@ -57,6 +57,13 @@ type NotFoundScenario = {
 
 type Scenario = DirectionScenario | NotFoundScenario;
 
+type DemoSignal = {
+  key: 'S1' | 'S2' | 'S3' | 'S4' | 'S5';
+  integration: string;
+  barcode: string;
+  signal: string;
+};
+
 const integrations = ['Нетрика', 'Адыгея', 'Брегис'];
 
 const scenarios: DirectionScenario[] = [
@@ -77,7 +84,7 @@ const scenarios: DirectionScenario[] = [
     route: 'Регламентных действий не требуется',
     userTitle: 'С направлением всё в порядке',
     userContext: 'Направление создано, чекин пройден, результаты доставлены.',
-    userAction: 'Ничего делать не нужно.',
+    userAction: 'Проверка завершена. Дополнительных действий не требуется.',
     assignedTests: 'Тест A · качественный, Тест B · количественный',
     deliveredTests: 'Тест A · результат доставлен, Тест B · результат доставлен',
     stages: [
@@ -182,6 +189,14 @@ const scenarios: DirectionScenario[] = [
   },
 ];
 
+const demoSignals: DemoSignal[] = [
+  { key: 'S1', integration: 'Нетрика', barcode: '1236514265', signal: 'Проверить направление после сообщения о возможной проблеме с доставкой.' },
+  { key: 'S2', integration: 'Адыгея', barcode: '2236514265', signal: 'Не удалось продолжить обработку направления после создания.' },
+  { key: 'S3', integration: 'Брегис', barcode: '3236514265', signal: 'Направление не прошло чекин.' },
+  { key: 'S4', integration: 'Нетрика', barcode: '4236514265', signal: 'Результат не доставлен. Требуется проверить направление.' },
+  { key: 'S5', integration: 'Нетрика', barcode: '9999999999', signal: 'Поступила жалоба по направлению, но его состояние неизвестно.' },
+];
+
 const statusText = (status: StageStatus) => {
   if (status === 'ok') return 'Пройден';
   if (status === 'error') return 'Проблема';
@@ -216,7 +231,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
     }
     if (!barcode.trim()) {
       clearResult();
-      setValidationMessage('Введите номер направления или штрихкод.');
+      setValidationMessage('Введите штрихкод направления.');
       barcodeRef.current?.focus();
       return;
     }
@@ -242,6 +257,14 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
     setTimeout(() => barcodeRef.current?.focus(), 0);
   };
 
+  const loadSignal = (signal: DemoSignal) => {
+    setIntegration(signal.integration);
+    setBarcode(signal.barcode);
+    setValidationMessage('');
+    clearResult();
+    setTimeout(() => barcodeRef.current?.focus(), 0);
+  };
+
   const openDetails = () => {
     if (!direction) return;
     const next = !detailsOpen;
@@ -262,7 +285,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
         vendor: scenario.integration,
         inz: '',
         contextLabel: `${scenario.integration} · штрихкод ${scenario.barcode} · направление не найдено`,
-        description: `GOVIN v0.6.1 · направление ${scenario.barcode} не найдено в интеграции ${scenario.integration}. Клиент, код клиента, ЛПУ и ИНЗ неизвестны и не подставлены. Требуется разбор.`,
+        description: `GOVIN v0.6.2 · направление ${scenario.barcode} не найдено в интеграции ${scenario.integration}. Клиент, код клиента, ЛПУ и ИНЗ неизвестны и не подставлены. Требуется разбор.`,
       });
       return;
     }
@@ -275,16 +298,16 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
       vendor: scenario.integration,
       inz: scenario.inz,
       contextLabel: `${scenario.integration} · ${scenario.externalId} · штрихкод ${scenario.barcode}`,
-      description: `GOVIN v0.6.1 · ${scenario.issue || 'ошибок не обнаружено'}. Идентификатор направления: ${scenario.barcode}. Интеграция: ${scenario.integration}. Клиент: ${scenario.client}. ЛПУ: ${scenario.lpu}. ИНЗ: ${scenario.inz || 'не присвоен / нет данных'}. Рекомендованный маршрут: ${scenario.route}.`,
+      description: `GOVIN v0.6.2 · ${scenario.issue || 'ошибок не обнаружено'}. Штрихкод направления: ${scenario.barcode}. Интеграция: ${scenario.integration}. Клиент: ${scenario.client}. ЛПУ: ${scenario.lpu}. ИНЗ: ${scenario.inz || 'не присвоен / нет данных'}. Рекомендованный маршрут: ${scenario.route}.`,
     });
   };
 
   const outcomeTitle = scenario?.key === 'S5' ? 'Направление не найдено' : direction?.userTitle || '';
   const outcomeContext = scenario?.key === 'S5'
-    ? `GOVIN не нашёл направление ${scenario.barcode} в интеграции «${scenario.integration}».`
+    ? `GOVIN не нашёл направление со штрихкодом ${scenario.barcode} в интеграции «${scenario.integration}».`
     : direction?.userContext || '';
   const actionNow = scenario?.key === 'S5'
-    ? 'Сначала перепроверьте номер направления и выбранную интеграцию.'
+    ? 'Сначала перепроверьте штрихкод направления и выбранную интеграцию.'
     : direction?.userAction || '';
   const routeText = scenario?.key === 'S5'
     ? 'Если данные верны — создайте обращение в ПРИИЗ для технической поддержки / ГСТИ.'
@@ -300,13 +323,46 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
             <Waypoints className="w-4 h-4" /> GOVIN-303
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#17383d]">Проверка направления и маппинга</h1>
-          <p className="text-sm text-slate-600 mt-1">Найдите направление — GOVIN покажет, что произошло и что делать дальше.</p>
+          <p className="text-sm text-slate-600 mt-1">Получили сигнал о направлении — возьмите из него интеграцию и штрихкод, затем проверьте в GOVIN.</p>
         </div>
-        <span className="self-start px-3 py-1.5 rounded-lg bg-[#e9f8f8] text-[#007f89] text-xs font-bold">DEMO v0.6.1</span>
+        <span className="self-start px-3 py-1.5 rounded-lg bg-[#e9f8f8] text-[#007f89] text-xs font-bold">DEMO v0.6.2</span>
       </div>
 
+      <details className="bg-sky-50 rounded-xl border border-sky-200 overflow-hidden" aria-label="DEMO входящий сигнал">
+        <summary className="cursor-pointer select-none p-4 md:p-5 font-extrabold text-[#17383d] flex items-center gap-2">
+          <BellRing className="w-4 h-4 text-sky-700" /> DEMO: входящий сигнал → GOVIN
+        </summary>
+        <div className="px-4 pb-4 md:px-5 md:pb-5 space-y-3">
+          <div className="rounded-lg bg-white border border-sky-100 p-3 text-sm text-slate-700">
+            <strong>Важно:</strong> точный формат реального алерта/чат-бота пока не подтверждён. Ниже только DEMO-модель входа. Для надёжного перехода в GOVIN сообщению нужны минимум <strong>интеграция</strong> и <strong>штрихкод направления</strong>.
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            {demoSignals.map((signal) => (
+              <div key={signal.key} className="rounded-lg bg-white border border-slate-200 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-sky-700">{signal.key} · ВХОДЯЩИЙ СИГНАЛ · DEMO</div>
+                  <p className="text-sm font-semibold text-slate-800 mt-1">{signal.signal}</p>
+                  <div className="text-xs text-slate-500 mt-2">
+                    Интеграция: <strong>{signal.integration}</strong> · Штрихкод: <strong className="font-mono">{signal.barcode}</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => loadSignal(signal)}
+                  className="shrink-0 h-10 px-3 rounded-lg border border-sky-300 bg-white text-sky-800 text-sm font-bold"
+                >
+                  Подставить в поиск
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-slate-500">DEMO-кнопка только переносит входные данные в поиск. Результат не показывается, пока менеджер сам не нажмёт «Проверить направление».</p>
+        </div>
+      </details>
+
       <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs" aria-label="Проверка направления">
-        <h2 className="text-base font-extrabold text-[#17383d] mb-4">Проверить направление</h2>
+        <h2 className="text-base font-extrabold text-[#17383d] mb-1">Проверить направление</h2>
+        <p className="text-xs text-slate-500 mb-4">Для поиска нужны интеграция и штрихкод направления.</p>
         <div className="grid grid-cols-1 md:grid-cols-[270px_1fr_230px] gap-3 items-start">
           <label className="text-sm font-bold text-slate-700">
             Интеграция
@@ -328,10 +384,10 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
           </label>
 
           <label className="text-sm font-bold text-slate-700">
-            Номер направления / штрихкод
+            Штрихкод направления
             <input
               ref={barcodeRef}
-              aria-label="Номер направления / штрихкод"
+              aria-label="Штрихкод направления"
               value={barcode}
               onChange={(e) => {
                 setBarcode(e.target.value);
@@ -339,10 +395,10 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
                 clearResult();
               }}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-              placeholder="Введите номер из алерта или чат-бота"
+              placeholder="Например, 4236514265"
               className="mt-1 w-full h-12 px-3 rounded-lg border border-slate-300 bg-white text-base"
             />
-            <span className="block mt-1 text-xs font-normal text-slate-500">Можно ввести номер вручную или отсканировать штрихкод</span>
+            <span className="block mt-1 text-xs font-normal text-slate-500">Скопируйте штрихкод из входящего сообщения или отсканируйте его</span>
           </label>
 
           <div className="md:pt-[25px]">
@@ -356,7 +412,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
         {validationMessage && <div role="alert" className="mt-3 text-sm font-semibold text-red-600">{validationMessage}</div>}
 
         <details className="mt-3 text-xs text-slate-400">
-          <summary className="cursor-pointer select-none text-right">DEMO-сценарии</summary>
+          <summary className="cursor-pointer select-none text-right">DEMO-сценарии без входящего сигнала</summary>
           <div className="flex flex-wrap gap-2 justify-end mt-2">
             {scenarios.map((item) => (
               <button
@@ -424,7 +480,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
             {scenario.key === 'S5' && (
               <>
                 <button type="button" onClick={retrySearch} className="h-12 px-5 rounded-lg bg-[#0099a8] hover:bg-[#007f89] text-white font-extrabold">
-                  Исправить номер или интеграцию
+                  Исправить штрихкод или интеграцию
                 </button>
                 <button type="button" onClick={createIncident} className="h-12 px-5 rounded-lg border border-slate-300 bg-white text-slate-700 font-bold">
                   Данные верны — создать обращение
@@ -557,7 +613,7 @@ export const DirectionCheckView: React.FC<DirectionCheckViewProps> = ({ onCreate
 
       <div className="flex items-start gap-2 text-[11px] text-slate-400">
         <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-        Только вымышленные DEMO-данные. Реальные API, ПДн и медицинские данные не используются.
+        Только вымышленные DEMO-данные. Реальные API, ПДн и медицинские данные не используются. Формат реального входящего алерта — TBD.
       </div>
     </div>
   );

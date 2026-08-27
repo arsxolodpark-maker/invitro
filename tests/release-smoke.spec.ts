@@ -15,15 +15,18 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: GOVIN v0.6.1 — понятный итог, действие, детали, маппинг и перенос в ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.6.2 — входящий сигнал → поиск → решение → ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
   await expect(page.getByText('Итог проверки')).toHaveCount(0);
 
-  await page.getByLabel('Интеграция').selectOption('Нетрика');
-  await page.getByLabel('Номер направления / штрихкод').fill('4236514265');
-  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await page.getByText('DEMO: входящий сигнал → GOVIN').click();
+  await page.getByRole('button', { name: 'Подставить в поиск', exact: true }).nth(3).click();
+  await expect(page.getByLabel('Интеграция')).toHaveValue('Нетрика');
+  await expect(page.getByLabel('Штрихкод направления')).toHaveValue('4236514265');
+  await expect(page.getByText('Итог проверки')).toHaveCount(0);
 
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByText('Итог проверки')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Результаты не доставлены' })).toBeVisible();
   await expect(page.getByText('Причина: у одного теста отсутствует маппинг. Доставка результатов отменена.', { exact: true })).toBeVisible();
