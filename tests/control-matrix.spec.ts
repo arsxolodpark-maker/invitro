@@ -12,17 +12,23 @@ test('проверены активные и будущие модули, вал
   }
 
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
-  await page.getByLabel('Штрихкод направления').fill('');
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByRole('alert')).toHaveText('Введите штрихкод направления.');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Выберите интеграцию.');
 
-  await page.getByLabel('Штрихкод направления').fill('1236514265');
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Ошибка доставки')).toBeVisible();
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
+  await page.getByLabel('Номер направления / штрихкод').fill('');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Введите номер направления или штрихкод.');
+
+  await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'С направлением всё в порядке' })).toBeVisible();
+
   await page.getByLabel('Интеграция').selectOption('Брегис');
-  await expect(page.getByText('Ошибка доставки')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByText('Брегис · внешнее направление')).toBeVisible();
+  await expect(page.getByText('Итог проверки')).toHaveCount(0);
+  await page.getByLabel('Номер направления / штрихкод').fill('3236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Инженер ГСТИ', exact: true }).click();
   await page.getByText('PRIIZ-000245', { exact: true }).click();
