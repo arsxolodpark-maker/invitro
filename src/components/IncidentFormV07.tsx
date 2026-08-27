@@ -13,12 +13,13 @@ interface Props {
 export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack, onSubmit }) => {
   const initiator = useMemo(() => getInitiatorSession() || getLatestInitiator(), []);
   const isExternal = currentRole === 'Инициатор';
-  const [client, setClient] = useState(prefill?.client || (isExternal ? initiator.organization : 'ООО «Демо-клиент»'));
-  const [clientCode, setClientCode] = useState(prefill?.clientCode || (isExternal ? initiator.clientCode : 'CLI-DEMO-01'));
-  const [lpu, setLpu] = useState(prefill?.lpu || 'Подразделение клиента · DEMO');
-  const [inz, setInz] = useState(prefill?.inz || '998877665');
-  const [vendor, setVendor] = useState(prefill?.vendor || 'Вендор МИС · DEMO');
-  const [description, setDescription] = useState(prefill?.description || 'DEMO: результат исследования не отображается в системе клиента.');
+  const fromGovin = prefill?.source === 'GOVIN-303';
+  const [client, setClient] = useState(prefill?.client ?? (isExternal ? initiator.organization : 'ООО «Демо-клиент»'));
+  const [clientCode, setClientCode] = useState(prefill?.clientCode ?? (isExternal ? initiator.clientCode : 'CLI-DEMO-01'));
+  const [lpu, setLpu] = useState(prefill?.lpu ?? (fromGovin ? '' : 'Подразделение клиента · DEMO'));
+  const [inz, setInz] = useState(prefill?.inz ?? (fromGovin ? '' : '998877665'));
+  const [vendor, setVendor] = useState(prefill?.vendor ?? 'Вендор МИС · DEMO');
+  const [description, setDescription] = useState(prefill?.description ?? 'DEMO: результат исследования не отображается в системе клиента.');
   const [vendorContacted, setVendorContacted] = useState(false);
   const [vendorAnswer, setVendorAnswer] = useState('');
 
@@ -63,7 +64,7 @@ export const IncidentFormV07: React.FC<Props> = ({ currentRole, prefill, onBack,
         <p className="text-sm text-slate-500 mt-2">Заполните данные, которые нужны для начала обработки обращения.</p>
       </div>
 
-      {prefill?.source === 'GOVIN-303' && <div className="rounded-xl border border-[#bce8e8] bg-[#eefafa] p-4 flex items-start gap-3 text-sm text-slate-700"><Waypoints className="w-5 h-5 text-[#0099a8] shrink-0 mt-0.5"/><div><strong className="text-[#17383d]">Данные перенесены из «Проверки направления».</strong><div className="text-xs mt-1 text-slate-600">{prefill.contextLabel || 'Контекст направления'} · проверьте данные перед отправкой.</div></div></div>}
+      {fromGovin && <div className="rounded-xl border border-[#bce8e8] bg-[#eefafa] p-4 flex items-start gap-3 text-sm text-slate-700"><Waypoints className="w-5 h-5 text-[#0099a8] shrink-0 mt-0.5"/><div><strong className="text-[#17383d]">Данные перенесены из «Проверки направления».</strong><div className="text-xs mt-1 text-slate-600">{prefill?.contextLabel || 'Контекст направления'} · проверьте данные перед отправкой.</div></div></div>}
 
       <form onSubmit={submit} className="bg-white border border-[#dfeaea] rounded-2xl p-6 shadow-xs space-y-5">
         {isExternal && <div className="rounded-xl border border-[#cfeaea] bg-[#f3fbfb] p-4 text-xs text-slate-600"><strong>Профиль:</strong> {initiator.email} · {initiator.organization}. Организация и код клиента уже заполнены.</div>}
