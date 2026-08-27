@@ -6,30 +6,33 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('проверены активные и будущие модули, GOVIN v0.5.5 и инженерная диагностика', async ({ page }) => {
+test('проверены активные и будущие модули, GOVIN v0.5.9 и инженерная диагностика', async ({ page }) => {
   for (const moduleName of ['ОМС / лимиты', 'Маркетплейс', 'Покрытие', 'Платформа']) {
     await expect(page.getByRole('button', { name: new RegExp(`^${moduleName}`) })).toBeDisabled();
   }
 
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
+  await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByRole('alert')).toHaveText('Сначала выберите интеграцию.');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Выберите интеграцию.');
 
   await page.getByLabel('Интеграция').selectOption('Нетрика');
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
-  await expect(page.getByRole('alert')).toHaveText('Введите номер направления или штрихкод из алерта / чат-бота.');
+  await expect(page.getByLabel('Номер направления / штрихкод')).toBeFocused();
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Введите номер направления или штрихкод.');
 
   await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByText('DIR-DEMO-001')).toBeVisible();
   await expect(page.getByRole('region', { name: 'Данные направления' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button')).toHaveCount(3);
   await expect(page.getByText('Сводка маппинга')).toBeVisible();
 
-  await page.getByRole('button', { name: /Демо-сценарии/ }).click();
-  await page.getByRole('button', { name: /S3 · Нечекин \/ нет маппинга услуги/ }).click();
+  await page.getByLabel('Интеграция').selectOption('Брегис');
+  await page.getByLabel('Номер направления / штрихкод').fill('3236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Нечекин / нет маппинга услуги' })).toBeVisible();
   await page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button', { name: /Этап 2.*Чекин/ }).click();
   await expect(page.getByText('Нечекин вызван отсутствующим маппингом услуги.')).toBeVisible();
