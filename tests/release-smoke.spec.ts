@@ -15,23 +15,23 @@ test.beforeEach(async ({ page }) => {
   await resetBrowserState(page);
 });
 
-test('ДКП: GOVIN v0.5.2 - три этапа, отмена доставки и перенос контекста в ПРИИЗ', async ({ page }) => {
+test('ДКП: GOVIN v0.5.9 - search-first, три бизнес-этапа и перенос контекста в ПРИИЗ', async ({ page }) => {
   await page.getByRole('button', { name: 'Проверка направления', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Проверка направления и маппинга' })).toBeVisible();
-  await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toBeVisible();
+  await expect(page.getByText('Получение услуг → чекин → доставка результатов')).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Этапы проверки' })).toHaveCount(0);
 
   await page.getByLabel('Интеграция').selectOption('Нетрика');
   await page.getByLabel('Номер направления / штрихкод').fill('1236514265');
-  await page.getByRole('button', { name: 'Найти', exact: true }).click();
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByText('DIR-DEMO-001')).toBeVisible();
-  await expect(page.getByText('Этап 1')).toBeVisible();
-  await expect(page.getByText('Этап 2')).toBeVisible();
-  await expect(page.getByText('Этап 3')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Этапы проверки' }).getByRole('button')).toHaveCount(3);
   await expect(page.getByText('Сводка маппинга')).toBeVisible();
   await expect(page.getByText('Создать обращение в ПРИИЗ')).toHaveCount(0);
 
-  await page.getByRole('button', { name: /Демо-сценарии/ }).click();
-  await page.getByRole('button', { name: /S4 · Ошибка доставки/ }).click();
+  await page.getByLabel('Интеграция').selectOption('Нетрика');
+  await page.getByLabel('Номер направления / штрихкод').fill('4236514265');
+  await page.getByRole('button', { name: 'Проверить направление', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Ошибка доставки / нет маппинга теста' })).toBeVisible();
   await expect(page.getByText('NMU-T05')).toBeVisible();
   await expect(page.getByText('Доставка отменена', { exact: true }).first()).toBeVisible();
